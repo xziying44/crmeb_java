@@ -1,0 +1,18 @@
+FROM node:14-alpine
+
+# 安装构建原生模块所需的依赖（python3, make, g++）
+RUN apk add --no-cache python3 make g++
+
+WORKDIR /app
+
+# 复制依赖配置文件
+COPY package*.json ./
+
+# 安装依赖（使用国内镜像加速）
+RUN npm install --registry=https://registry.npmmirror.com
+
+# 暴露开发服务器端口
+EXPOSE 9527
+
+# 启动开发服务器（使用 docker 模式读取 .env.docker）
+CMD ["npm", "run", "dev", "--", "--mode", "docker"]

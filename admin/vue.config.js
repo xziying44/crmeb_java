@@ -37,6 +37,13 @@ module.exports = {
       warnings: false,
       errors: true,
     },
+    // Docker 环境下代理后端 API，避免跨域
+    proxy: process.env.VUE_APP_API_PROXY ? {
+      '/api': {
+        target: process.env.VUE_APP_API_PROXY,
+        changeOrigin: true,
+      },
+    } : undefined,
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that
