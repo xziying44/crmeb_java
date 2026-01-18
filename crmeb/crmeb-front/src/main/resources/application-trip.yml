@@ -25,7 +25,7 @@ spring:
     #  数据库配置
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/java_trip?characterEncoding=utf-8&useSSL=false&serverTimeZone=GMT+8
     username: java_trip
     password: 111111
