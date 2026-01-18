@@ -81,6 +81,51 @@ npm install
 # 使用 HBuilderX 打开运行 (H5/微信小程序/APP)
 ```
 
+### Docker 开发环境
+
+> 首次使用需复制环境变量文件：`cp .env.example .env`
+
+```bash
+# 启动服务（后台运行）
+docker-compose up -d
+
+# 停止服务
+docker-compose stop
+
+# 重启服务
+docker-compose restart
+
+# 重启单个服务
+docker-compose restart mysql
+docker-compose restart redis
+
+# 查看服务状态
+docker-compose ps
+
+# 查看日志（实时）
+docker-compose logs -f
+
+# 查看单个服务日志
+docker-compose logs -f mysql
+docker-compose logs -f redis
+
+# 完全停止并删除容器（数据保留在 Volume 中）
+docker-compose down
+
+# 连接 MySQL 客户端
+docker-compose exec mysql mysql -u single_open -p single_open
+
+# 连接 Redis 客户端
+docker-compose exec redis redis-cli -a 111111
+```
+
+**端口映射：**
+
+| 服务 | 容器端口 | 本机端口 |
+|-----|---------|---------|
+| MySQL | 3306 | 3307 |
+| Redis | 6379 | 6380 |
+
 ## 包结构约定
 
 - **Controller**: `com.zbkj.{admin|front}.controller.*`

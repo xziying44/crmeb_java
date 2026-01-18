@@ -6,8 +6,6 @@ crmeb/LOG_HOME_IS_UNDEFINED
 *.
 *.
 .DS_Store
-<<<<<<< HEAD
-=======
 
 # Large files
 *.zip
@@ -19,7 +17,9 @@ crmeb/LOG_HOME_IS_UNDEFINED
 
 # Working directories
 .claude/
->>>>>>> 6332e5584c59ad3c1c3eab43b79261a53c5a20e6
 /.mcp.json
 /.zcf/
 /.workflow/
+
+# Docker 环境变量（包含敏感信息）
+.env
