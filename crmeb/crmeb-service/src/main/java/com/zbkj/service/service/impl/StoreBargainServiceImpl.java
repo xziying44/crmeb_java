@@ -693,6 +693,11 @@ public class StoreBargainServiceImpl extends ServiceImpl<StoreBargainDao, StoreB
             }
             bargainUserList.addAll(bargainUsers);
         }
+        // 没有需要更新的用户数据时，直接返回
+        if (CollUtil.isEmpty(bargainUserList)) {
+            logger.info("砍价活动结束后更新用户状态定时任务——————无需更新的数据");
+            return;
+        }
         boolean b = storeBargainUserService.updateBatchById(bargainUserList, 100);
         if (!b) {
             logger.error("砍价活动结束后更新用户状态定时任务——————失败");
