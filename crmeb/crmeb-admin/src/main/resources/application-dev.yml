@@ -7,7 +7,7 @@ crmeb:
   wechat-js-api-beta: true #微信js api是否是beta版本
   asyncConfig: true #是否同步config表数据到redis
   asyncWeChatProgramTempList: false #是否同步小程序公共模板库
-  imagePath: /JAVA_PROJECT/OPEN/dev/admin/ # 服务器图片路径配置 斜杠结尾
+  imagePath: /Users/xziying/project/bespoke/crmeb_java/upload/ # 服务器图片路径配置 斜杠结尾
   captchaOn: false # 是否开启行为验证码
   demoSite: true # 是否演示站点 所有手机号码都会掩码
 
