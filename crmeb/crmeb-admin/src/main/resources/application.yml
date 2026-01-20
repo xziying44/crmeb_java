@@ -114,8 +114,8 @@ mybatis-plus:
   mapper-locations: classpath*:mapper/*/*Mapper.xml #xml扫描，多个目录用逗号或者分号分隔（告诉 Mapper 所对应的 XML 文件位置）
   typeAliasesPackage: com.zbkj.**.model
   # 配置slq打印日志
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:
 #      logic-delete-field: isDel  #全局逻辑删除字段值 3.3.0开始支持，详情看下面。
