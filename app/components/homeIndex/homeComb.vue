@@ -668,7 +668,7 @@
 				height: 310rpx;
 
 				&.scalex {
-					/deep/.uni-swiper-slide-frame {
+					::v-deep.uni-swiper-slide-frame {
 						transform: translate(0, 0) !important;
 					}
 				}
@@ -679,7 +679,7 @@
 				transition: all 0.6s ease;
 			}
 
-			/deep/ swiper-item.active {
+			::v-deepswiper-item.active {
 				image {
 					transform: scale(1);
 				}

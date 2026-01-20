@@ -311,7 +311,7 @@
 
 <style lang="scss" scoped>
 	.smallBox {
-		padding-bottom: calc(130rpx+ constant(safe-area-inset-bottom)); ///兼容 IOS<11.2/
+		padding-bottom: calc(130rpx + constant(safe-area-inset-bottom)); ///兼容 IOS<11.2/
 		padding-bottom: calc(130rpx + env(safe-area-inset-bottom)); ///兼容 IOS>11.2/
 	}
 
@@ -360,7 +360,7 @@
 					overflow: hidden;
 				}
 
-				/deep/ .easy-loadimage,
+				::v-deep.easy-loadimage,
 				uni-image,
 				.easy-loadimage {
 					width: 90rpx;
