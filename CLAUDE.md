@@ -10,7 +10,14 @@ CRMEB 开源商城系统 Java 版 - 基于 Apache-2.0 协议的多端电商解�
 
 - **后端**: SpringBoot 2.2.6 + MyBatis-Plus 3.3.1 + Spring Security + JDK 1.8
 - **前端**: Vue 2.x + Element UI 2.15 (管理端) / uni-app (移动端)
-- **数据**: MySQL 5.7 + Redis
+- **数据**: MySQL 8.0 + Redis
+
+## 开发环境
+
+- **Java**: `/Users/xziying/Library/Java/JavaVirtualMachines/azul-1.8.0_472/Contents/Home/bin/java`
+- **数据库**: MySQL 和 Redis 运行在 Docker 容器中（见 `docker-compose.yml` 和 `.env`）
+  - MySQL: 本机端口 `3307`，数据库 `single_open`，用户 `single_open`
+  - Redis: 本机端口 `6380`
 
 ## 架构设计
 
@@ -81,50 +88,15 @@ npm install
 # 使用 HBuilderX 打开运行 (H5/微信小程序/APP)
 ```
 
-### Docker 开发环境
-
-> 首次使用需复制环境变量文件：`cp .env.example .env`
+### Docker 数据库调试
 
 ```bash
-# 启动服务（后台运行）
-docker-compose up -d
-
-# 停止服务
-docker-compose stop
-
-# 重启服务
-docker-compose restart
-
-# 重启单个服务
-docker-compose restart mysql
-docker-compose restart redis
-
-# 查看服务状态
-docker-compose ps
-
-# 查看日志（实时）
-docker-compose logs -f
-
-# 查看单个服务日志
-docker-compose logs -f mysql
-docker-compose logs -f redis
-
-# 完全停止并删除容器（数据保留在 Volume 中）
-docker-compose down
-
-# 连接 MySQL 客户端
+# 连接 MySQL 客户端（密码见 .env 文件）
 docker-compose exec mysql mysql -u single_open -p single_open
 
 # 连接 Redis 客户端
 docker-compose exec redis redis-cli -a 111111
 ```
-
-**端口映射：**
-
-| 服务 | 容器端口 | 本机端口 |
-|-----|---------|---------|
-| MySQL | 3306 | 3307 |
-| Redis | 6379 | 6380 |
 
 ## 包结构约定
 
