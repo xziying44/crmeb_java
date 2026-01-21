@@ -3,10 +3,11 @@
 -- 说明：
 -- 1) 本脚本尽量保持可重复执行（通过 EXISTS/条件插入避免重复数据）
 -- 2) 正式执行前请在测试库验证无误
+-- 3) 适配 MySQL 8.0 和现有 eb_system_menu 表结构（无 path 字段）
 -- =====================================================
 
 -- 1. eb_system_role 新增字段：是否业务员角色
--- 提示：MySQL 5.7 不支持 ADD COLUMN IF NOT EXISTS，如重复执行遇到“Duplicate column name”可忽略或先手工判断是否已存在
+-- 提示：如重复执行遇到"Duplicate column name"可忽略
 ALTER TABLE eb_system_role
   ADD COLUMN is_salesman_role TINYINT(1) DEFAULT 0 COMMENT '是否业务员角色 0-否 1-是';
 
@@ -26,7 +27,7 @@ CREATE TABLE IF NOT EXISTS eb_salesman_info (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='业务员扩展信息表';
 
 -- 3. eb_user 新增字段：绑定业务员（admin_id）与绑定时间
--- 提示：如重复执行遇到“Duplicate column name”可忽略或先手工判断是否已存在
+-- 提示：如重复执行遇到"Duplicate column name"可忽略
 ALTER TABLE eb_user
   ADD COLUMN salesman_id INT(11) DEFAULT 0 COMMENT '绑定的业务员ID（admin_id）';
 ALTER TABLE eb_user
@@ -43,39 +44,71 @@ WHERE NOT EXISTS (
   SELECT 1 FROM eb_system_role WHERE role_name = '业务员' OR is_salesman_role = 1
 );
 
--- 5. 创建业务员专属菜单（示例：pid=0 顶级菜单；如已存在则跳过）
-INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, path, component, sort, is_show, create_time, update_time)
-SELECT 0, '业务员管理', 'el-icon-user', '', 'M', 'salesman', '', 100, 1, NOW(), NOW()
+-- 5. 创建业务员专属菜单（注意：eb_system_menu 表无 path 字段，使用 component 存储路由）
+-- 父菜单：业务员管理
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT 0, '业务员管理', 'el-icon-user', '', 'M', '/salesman', 100, 1, NOW(), NOW()
 FROM DUAL
 WHERE NOT EXISTS (
-  SELECT 1 FROM eb_system_menu WHERE path = 'salesman' AND menu_type = 'M'
+  SELECT 1 FROM eb_system_menu WHERE component = '/salesman' AND menu_type = 'M'
 );
 
--- 取父菜单ID（如果父菜单已存在，则取已存在的 ID）
+-- 取父菜单ID
 SET @parent_id = (
-  SELECT id FROM eb_system_menu WHERE path = 'salesman' AND menu_type = 'M' ORDER BY id DESC LIMIT 1
+  SELECT id FROM eb_system_menu WHERE component = '/salesman' AND menu_type = 'M' ORDER BY id DESC LIMIT 1
 );
 
 -- 子菜单：业务员列表
-INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, path, component, sort, is_show, create_time, update_time)
-SELECT @parent_id, '业务员列表', '', 'admin:salesman:list', 'C', 'list', 'salesman/list/index', 1, 1, NOW(), NOW()
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT @parent_id, '业务员列表', '', 'admin:salesman:list', 'C', 'salesman/list/index', 1, 1, NOW(), NOW()
 FROM DUAL
 WHERE NOT EXISTS (
   SELECT 1 FROM eb_system_menu WHERE perms = 'admin:salesman:list'
 );
 
 -- 子菜单：客户绑定记录
-INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, path, component, sort, is_show, create_time, update_time)
-SELECT @parent_id, '客户绑定记录', '', 'admin:salesman:bindList', 'C', 'bindList', 'salesman/bindList/index', 2, 1, NOW(), NOW()
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT @parent_id, '客户绑定记录', '', 'admin:salesman:bindList', 'C', 'salesman/bindList/index', 2, 1, NOW(), NOW()
 FROM DUAL
 WHERE NOT EXISTS (
   SELECT 1 FROM eb_system_menu WHERE perms = 'admin:salesman:bindList'
 );
 
 -- 子菜单：业绩统计
-INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, path, component, sort, is_show, create_time, update_time)
-SELECT @parent_id, '业绩统计', '', 'admin:salesman:statistics', 'C', 'statistics', 'salesman/statistics/index', 3, 1, NOW(), NOW()
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT @parent_id, '业绩统计', '', 'admin:salesman:statistics', 'C', 'salesman/statistics/index', 3, 1, NOW(), NOW()
 FROM DUAL
 WHERE NOT EXISTS (
   SELECT 1 FROM eb_system_menu WHERE perms = 'admin:salesman:statistics'
 );
+
+-- 6. 操作按钮权限（menu_type='A'）
+-- 新增业务员
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT (SELECT id FROM eb_system_menu WHERE perms = 'admin:salesman:list'), '新增业务员', '', 'admin:salesman:save', 'A', '', 1, 0, NOW(), NOW()
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:salesman:save');
+
+-- 编辑业务员
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT (SELECT id FROM eb_system_menu WHERE perms = 'admin:salesman:list'), '编辑业务员', '', 'admin:salesman:update', 'A', '', 2, 0, NOW(), NOW()
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:salesman:update');
+
+-- 删除业务员
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT (SELECT id FROM eb_system_menu WHERE perms = 'admin:salesman:list'), '删除业务员', '', 'admin:salesman:delete', 'A', '', 3, 0, NOW(), NOW()
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:salesman:delete');
+
+-- 业务员详情
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT (SELECT id FROM eb_system_menu WHERE perms = 'admin:salesman:list'), '业务员详情', '', 'admin:salesman:info', 'A', '', 4, 0, NOW(), NOW()
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:salesman:info');
+
+-- 转移客户
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT (SELECT id FROM eb_system_menu WHERE perms = 'admin:salesman:bindList'), '转移客户', '', 'admin:salesman:transfer', 'A', '', 1, 0, NOW(), NOW()
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:salesman:transfer');

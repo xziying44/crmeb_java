@@ -102,6 +102,7 @@ public class WebConfig implements WebMvcConfigurer {
                 excludePathPatterns("/api/front/menu/user").
                 excludePathPatterns("/api/front/combination/header").
                 excludePathPatterns("/api/front/combination/detail").
+                excludePathPatterns("/api/front/salesman/checkCode").  // 业务员邀请码验证（扫码场景）
                 excludePathPatterns("/swagger-resources/**", "/webjars/**", "/v2/**", "/swagger-ui.html/**");
     }
 
