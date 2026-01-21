@@ -16,6 +16,7 @@ import com.zbkj.common.request.SystemAdminRequest;
 import com.zbkj.common.request.SystemAdminUpdateRequest;
 import com.zbkj.common.response.SystemAdminResponse;
 import com.zbkj.common.utils.CrmebUtil;
+import com.zbkj.common.utils.SecurityUtil;
 import com.zbkj.common.utils.ValidateFormUtil;
 import com.github.pagehelper.PageHelper;
 import com.zbkj.service.dao.SystemAdminDao;
@@ -108,8 +109,7 @@ public class SystemAdminServiceImpl extends ServiceImpl<SystemAdminDao, SystemAd
     @Override
     public Boolean saveAdmin(SystemAdminAddRequest systemAdminAddRequest) {
         // 管理员名称唯一校验
-        Integer result = checkAccount(systemAdminAddRequest.getAccount());
-        if (result > 0) {
+        if (checkAccount(systemAdminAddRequest.getAccount())) {
             throw new CrmebException("管理员已存在");
         }
         // 如果有手机号，校验手机号
@@ -126,15 +126,30 @@ public class SystemAdminServiceImpl extends ServiceImpl<SystemAdminDao, SystemAd
     }
 
     /**
-     * 管理员名称唯一校验
+     * 检查账号是否存在（仅统计未删除账号）
      * @param account 管理员账号
-     * @return Integer
+     * @return Boolean
      */
-    private Integer checkAccount(String account) {
+    @Override
+    public Boolean checkAccount(String account) {
         LambdaQueryWrapper<SystemAdmin> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(SystemAdmin::getAccount, account);
-        return dao.selectCount(lambdaQueryWrapper);
+        lambdaQueryWrapper.eq(SystemAdmin::getIsDel, false);
+        return dao.selectCount(lambdaQueryWrapper) > 0;
+    }
 
+    /**
+     * 根据账号获取管理员（仅查询未删除账号）
+     * @param account 管理员账号
+     * @return SystemAdmin
+     */
+    @Override
+    public SystemAdmin getByAccount(String account) {
+        LambdaQueryWrapper<SystemAdmin> lqw = Wrappers.lambdaQuery();
+        lqw.eq(SystemAdmin::getAccount, account);
+        lqw.eq(SystemAdmin::getIsDel, false);
+        lqw.last("LIMIT 1");
+        return dao.selectOne(lqw);
     }
 
     /**
@@ -274,5 +289,12 @@ public class SystemAdminServiceImpl extends ServiceImpl<SystemAdminDao, SystemAd
         return dao.selectOne(lqw);
     }
 
-}
+    /**
+     * 获取当前登录管理员ID
+     */
+    @Override
+    public Integer getLoginAdminId() {
+        return SecurityUtil.getLoginUserVo().getUser().getId();
+    }
 
+}

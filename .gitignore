@@ -15,6 +15,9 @@ crmeb/LOG_HOME_IS_UNDEFINED
 *.rar
 *.7z
 
+# 业务员模块数据库变更脚本需要纳入版本管理
+!crmeb/sql/salesman_schema.sql
+
 # Working directories
 .claude/
 /.mcp.json
@@ -26,3 +29,6 @@ crmeb/LOG_HOME_IS_UNDEFINED
 
 # 上传文件目录
 upload/
+
+# Maven 临时本地仓库（用于在受限环境下下载/缓存依赖执行测试）
+.m2_repo/

@@ -45,6 +45,9 @@ public class LoginMobileRequest implements Serializable {
     @JsonProperty(value = "spread_spid")
     private Integer spreadPid;
 
+    @ApiModelProperty(value = "业务员邀请码（可选）")
+    private String salesmanCode;
+
 
 
 }

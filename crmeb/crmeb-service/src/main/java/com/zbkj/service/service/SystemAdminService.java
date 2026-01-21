@@ -83,4 +83,19 @@ public interface SystemAdminService extends IService<SystemAdmin> {
      * @return SystemAdmin
      */
     SystemAdmin selectUserByUserName(String username);
+
+    /**
+     * 检查账号是否存在（仅统计未删除账号）
+     */
+    Boolean checkAccount(String account);
+
+    /**
+     * 根据账号获取管理员（仅查询未删除账号）
+     */
+    SystemAdmin getByAccount(String account);
+
+    /**
+     * 获取当前登录管理员ID
+     */
+    Integer getLoginAdminId();
 }

@@ -1,4 +1,4 @@
-package com.zbkj.common.model.system;
+package com.zbkj.common.model.salesman;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -13,7 +13,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 身份管理表
+ * 业务员扩展信息表
  * +----------------------------------------------------------------------
  * | CRMEB [ CRMEB赋能开发者，助力企业发展 ]
  * +----------------------------------------------------------------------
@@ -27,34 +27,35 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("eb_system_role")
-@ApiModel(value="SystemRole对象", description="身份管理表")
-public class SystemRole implements Serializable {
+@TableName("eb_salesman_info")
+@ApiModel(value = "SalesmanInfo对象", description = "业务员扩展信息表")
+public class SalesmanInfo implements Serializable {
 
-    private static final long serialVersionUID=1L;
+    private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value = "身份管理id")
+    @ApiModelProperty(value = "主键ID")
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
-    @ApiModelProperty(value = "身份管理名称")
-    private String roleName;
+    @ApiModelProperty(value = "关联的管理员ID")
+    private Integer adminId;
 
-    @ApiModelProperty(value = "身份管理权限(menus_id)")
-    private String rules;
+    @ApiModelProperty(value = "业务员邀请码（6-8位字母数字）")
+    private String salesmanCode;
 
-    private Integer level;
+    @ApiModelProperty(value = "小程序码图片地址")
+    private String salesmanQrcode;
 
-    @ApiModelProperty(value = "状态：0-关闭，1-正常")
-    private Boolean status;
+    @ApiModelProperty(value = "小程序码scene参数")
+    private String qrcodeScene;
 
-    @ApiModelProperty(value = "是否业务员角色 0-否 1-是")
-    private Boolean isSalesmanRole;
+    @ApiModelProperty(value = "是否可被绑定 0-否 1-是")
+    private Boolean bindable;
 
     @ApiModelProperty(value = "创建时间")
     private Date createTime;
 
-    @ApiModelProperty(value = "修改时间")
+    @ApiModelProperty(value = "更新时间")
     private Date updateTime;
-
 }
+

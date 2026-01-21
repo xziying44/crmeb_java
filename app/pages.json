@@ -59,6 +59,19 @@
 					// #endif
 				}
 			}
+		},
+		{
+			"path": "pages/salesman/bind",
+			"style": {
+				"navigationBarTitleText": "绑定业务员",
+				"app-plus": {
+					// #ifdef APP-PLUS
+					"titleNView": {
+						"type": "default"
+					}
+					// #endif
+				}
+			}
 		}
     ],
 	"subPackages": [{

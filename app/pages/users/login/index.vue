@@ -36,6 +36,12 @@
 						</button>
 					</div>
 				</div>
+				<div class="item">
+					<div class="acea-row row-middle">
+						<image :src="urlDomain+'crmebimage/perset/staticImg/code_2.png'" style="width: 28rpx; height: 32rpx;"></image>
+						<input type="text" class="texts" placeholder="邀请码（可选）" v-model="salesmanCode" maxlength="16" />
+					</div>
+				</div>
 				<div class="item" v-if="isShowCode">
 					<div class="acea-row row-middle">
 						<image :src="urlDomain+'crmebimage/perset/staticImg/code_2.png'" style="width: 28rpx; height: 32rpx;"></image>
@@ -132,7 +138,8 @@
 				appleUserInfo: null,
 				appleShow: false ,// 苹果登录版本必须要求ios13以上的
 				theme:app.globalData.theme,
-				mobileLoginLogo: app.globalData.mobileLoginLogo // 登录页logo
+				mobileLoginLogo: app.globalData.mobileLoginLogo, // 登录页logo
+				salesmanCode: '' // 业务员邀请码（可选）
 			};
 		},
 		watch:{
@@ -146,7 +153,7 @@
 		},
 		mounted: function() {
 		},
-		onLoad() {
+		onLoad(options) {
 			let self = this
 			uni.getSystemInfo({
 				success: function(res) {
@@ -155,6 +162,12 @@
 					}
 				}
 			});
+			// 扫码进入时可自动带入邀请码
+			if (options && options.salesmanCode) {
+				this.salesmanCode = options.salesmanCode;
+			} else if (app && app.globalData && app.globalData.salesmanCode) {
+				this.salesmanCode = app.globalData.salesmanCode;
+			}
 		},
 		methods: {
 			//滑块验证成功后
@@ -342,7 +355,8 @@
 				loginMobile({
 						phone: that.account,
 						captcha: that.captcha,
-						spread_spid: that.$Cache.get("spread")
+						spread_spid: that.$Cache.get("spread"),
+						salesmanCode: that.salesmanCode
 						// spread_spid: uni.getStorageSync('spid')
 					})
 					.then(res => {

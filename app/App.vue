@@ -26,6 +26,7 @@
 		globalData: {
 			statusBarHeight: statusBarHeight, //手机端头部手机时间位置高度
 			spread: 0, //推广人id
+			salesmanCode: '', //业务员邀请码（扫码进入时可带入）
 			code: 0,
 			isLogin: false,
 			userInfo: {},
@@ -114,12 +115,25 @@
 					case 1049: //手机相册选取小程序码
 					case 1001: //直接进入小程序
 
-					let value = this.$util.getUrlParams(decodeURIComponent(option.query.scene));
+					// 兼容业务员绑定：scene 形如 s_XXXXXX（仅包含邀请码）
+					const sceneStr = decodeURIComponent(option.query.scene);
+					if (typeof sceneStr === 'string' && sceneStr.indexOf('s_') === 0) {
+						const code = sceneStr.substring(2);
+						that.globalData.salesmanCode = code;
+						// 自动跳转到绑定页
+						setTimeout(() => {
+							uni.navigateTo({
+								url: `/pages/salesman/bind?code=${code}`
+							});
+						}, 50);
+						break;
+					}
+
+					let value = this.$util.getUrlParams(sceneStr);
 					let mapeMpQrCodeValue = this.$util.formatMpQrCodeData(value);
-					// that.globalData = mapeMpQrCodeValue;
-					that.globalData = Object.assign(that.globalData,mapeMpQrCodeValue);
+					that.globalData = Object.assign(that.globalData, mapeMpQrCodeValue);
 					that.globalData.spread = mapeMpQrCodeValue.spread ? mapeMpQrCodeValue.spread : '';
-                    break;
+					break;
 				}
 			}
 			if (option.spread) that.globalData.spread = option.spread;

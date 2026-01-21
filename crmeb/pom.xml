@@ -26,6 +26,8 @@
         <springfox.version>2.9.2</springfox.version>
         <swagger-models.version>1.5.22</swagger-models.version>
         <swagger-bootstrap-ui.version>1.9.3</swagger-bootstrap-ui.version>
+        <!-- 兼容较新 JDK 的 Lombok 版本（本地构建环境可能不是 JDK8） -->
+        <lombok.version>1.18.24</lombok.version>
 <!--        兼容个别 mav 环境 GBK问题-->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -62,6 +64,12 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.33</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
         </dependency>
 
         <!--代码自动生成工具-->
@@ -327,6 +335,14 @@
                     <compilerArguments>
                         <verbose/>
                     </compilerArguments>
+                    <!-- 显式声明注解处理器，避免在新 JDK 下 Lombok 未生效导致缺失 getter/setter -->
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                     <!-- <failOnMissingWebXml>false</failOnMissingWebXml> -->
                 </configuration>
             </plugin>

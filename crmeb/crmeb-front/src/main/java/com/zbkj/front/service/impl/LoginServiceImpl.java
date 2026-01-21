@@ -6,6 +6,7 @@ import cn.hutool.core.util.StrUtil;
 import com.zbkj.common.constants.Constants;
 import com.zbkj.common.constants.SmsConstants;
 import com.zbkj.common.exception.CrmebException;
+import com.zbkj.common.model.salesman.SalesmanInfo;
 import com.zbkj.common.model.user.User;
 import com.zbkj.common.request.LoginMobileRequest;
 import com.zbkj.common.request.LoginRequest;
@@ -16,6 +17,7 @@ import com.zbkj.common.utils.CrmebUtil;
 import com.zbkj.common.utils.CrmebDateUtil;
 import com.zbkj.common.utils.RedisUtil;
 import com.zbkj.front.service.LoginService;
+import com.zbkj.service.service.SalesmanInfoService;
 import com.zbkj.service.service.SystemConfigService;
 import com.zbkj.service.service.UserService;
 import org.slf4j.Logger;
@@ -57,6 +59,9 @@ public class LoginServiceImpl implements LoginService {
     private FrontTokenComponent tokenComponent;
     @Autowired
     private SystemConfigService systemConfigService;
+
+    @Autowired
+    private SalesmanInfoService salesmanInfoService;
 
     /**
      * 账号密码登录
@@ -114,6 +119,8 @@ public class LoginServiceImpl implements LoginService {
         User user = userService.getByPhone(loginRequest.getPhone());
         if (ObjectUtil.isNull(user)) {// 此用户不存在，走新用户注册流程
             user = userService.registerPhone(loginRequest.getPhone(), spreadPid);
+            // 新用户注册后如携带邀请码则进行绑定
+            bindSalesmanIfNeeded(user, loginRequest.getSalesmanCode());
         } else {
             if (!user.getStatus()) {
                 throw new CrmebException("当前账户已禁用，请联系管理员！");
@@ -122,6 +129,10 @@ public class LoginServiceImpl implements LoginService {
                 // 绑定推广关系
                 bindSpread(user, spreadPid);
             }
+
+            // 老用户登录如未绑定且携带邀请码，则进行绑定
+            bindSalesmanIfNeeded(user, loginRequest.getSalesmanCode());
+
             // 记录最后一次登录时间
             user.setLastLoginTime(CrmebDateUtil.nowDateTime());
             user.setUpdateTime(DateUtil.date());
@@ -139,6 +150,26 @@ public class LoginServiceImpl implements LoginService {
         loginResponse.setNikeName(user.getNickname());
         loginResponse.setPhone(user.getPhone());
         return loginResponse;
+    }
+
+    /**
+     * 绑定业务员关系（仅当用户未绑定且邀请码有效时）
+     */
+    private void bindSalesmanIfNeeded(User user, String salesmanCode) {
+        if (ObjectUtil.isNull(user) || StrUtil.isBlank(salesmanCode)) {
+            return;
+        }
+        if (ObjectUtil.isNotNull(user.getSalesmanId()) && user.getSalesmanId() > 0) {
+            return;
+        }
+        SalesmanInfo info = salesmanInfoService.getByCode(salesmanCode);
+        if (ObjectUtil.isNull(info) || !Boolean.TRUE.equals(info.getBindable())) {
+            throw new CrmebException("邀请码无效");
+        }
+        user.setSalesmanId(info.getAdminId());
+        user.setSalesmanBindTime(CrmebDateUtil.nowDateTime());
+        user.setUpdateTime(DateUtil.date());
+        userService.updateById(user);
     }
 
     /**

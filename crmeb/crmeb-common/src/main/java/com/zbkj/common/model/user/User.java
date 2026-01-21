@@ -157,5 +157,10 @@ public class User implements Serializable {
     @ApiModelProperty(value = "成为分销员时间")
     private Date promoterTime;
 
+    @ApiModelProperty(value = "绑定的业务员ID（admin_id）")
+    private Integer salesmanId;
+
+    @ApiModelProperty(value = "绑定业务员时间")
+    private Date salesmanBindTime;
 
 }
