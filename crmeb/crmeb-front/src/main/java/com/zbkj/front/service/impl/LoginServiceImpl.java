@@ -164,7 +164,9 @@ public class LoginServiceImpl implements LoginService {
         }
         SalesmanInfo info = salesmanInfoService.getByCode(salesmanCode);
         if (ObjectUtil.isNull(info) || !Boolean.TRUE.equals(info.getBindable())) {
-            throw new CrmebException("邀请码无效");
+            // 邀请码无效时静默跳过，不影响登录流程，仅记录日志
+            logger.warn("业务员邀请码无效或不可绑定，跳过绑定: code={}, uid={}", salesmanCode, user.getUid());
+            return;
         }
         user.setSalesmanId(info.getAdminId());
         user.setSalesmanBindTime(CrmebDateUtil.nowDateTime());

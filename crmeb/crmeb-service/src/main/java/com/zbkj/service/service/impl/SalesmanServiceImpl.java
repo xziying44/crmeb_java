@@ -21,9 +21,11 @@ import com.zbkj.common.request.SystemAdminLoginRequest;
 import com.zbkj.common.request.SystemAdminUpdateRequest;
 import com.zbkj.common.response.SalesmanResponse;
 import com.zbkj.common.vo.CustomerBindRecordVo;
+import com.zbkj.common.vo.CustomerConsumeStatsVo;
 import com.zbkj.common.vo.SalesmanDashboardVo;
 import com.zbkj.service.service.SalesmanInfoService;
 import com.zbkj.service.service.SalesmanService;
+import com.zbkj.service.service.StoreOrderService;
 import com.zbkj.service.service.SystemAdminService;
 import com.zbkj.service.service.SystemRoleService;
 import com.zbkj.service.service.UserService;
@@ -69,6 +71,9 @@ public class SalesmanServiceImpl implements SalesmanService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private StoreOrderService storeOrderService;
 
     @Override
     public CommonPage<SalesmanResponse> getList(SalesmanSearchRequest request, PageParamRequest pageRequest) {
@@ -316,6 +321,10 @@ public class SalesmanServiceImpl implements SalesmanService {
                 .collect(Collectors.toSet());
         Map<Integer, SystemAdmin> adminMap = getAdminMap(new ArrayList<>(salesmanIds));
 
+        // 获取用户消费统计（批量查询）
+        List<Integer> userIds = userList.stream().map(User::getUid).collect(Collectors.toList());
+        Map<Integer, CustomerConsumeStatsVo> consumeStatsMap = storeOrderService.getConsumeStatsByUids(userIds);
+
         // 组装响应
         List<CustomerBindRecordVo> voList = userList.stream().map(user -> {
             CustomerBindRecordVo vo = new CustomerBindRecordVo();
@@ -331,9 +340,16 @@ public class SalesmanServiceImpl implements SalesmanService {
                 vo.setSalesmanName(admin.getRealName());
             }
 
-            // TODO: 获取消费统计（阶段一先返回0，后续在统计模块补齐）
-            vo.setTotalAmount(BigDecimal.ZERO);
-            vo.setOrderCount(0);
+            // 填充消费统计
+            CustomerConsumeStatsVo stats = consumeStatsMap.get(user.getUid());
+            if (stats != null) {
+                vo.setTotalAmount(stats.getTotalAmount());
+                vo.setOrderCount(stats.getOrderCount());
+                vo.setLastOrderTime(stats.getLastOrderTime());
+            } else {
+                vo.setTotalAmount(BigDecimal.ZERO);
+                vo.setOrderCount(0);
+            }
 
             return vo;
         }).collect(Collectors.toList());
@@ -435,31 +451,25 @@ public class SalesmanServiceImpl implements SalesmanService {
     }
 
     /**
-     * 获取客户数量Map
+     * 获取客户数量Map（批量查询优化，解决 N+1 问题）
      */
     private Map<Integer, Integer> getCustomerCountMap(List<Integer> salesmanIds) {
         if (salesmanIds.isEmpty()) {
             return new HashMap<>();
         }
-        Map<Integer, Integer> result = new HashMap<>();
-        for (Integer id : salesmanIds) {
-            result.put(id, getCustomerCount(id));
-        }
-        return result;
+        // 使用批量 GROUP BY 查询替代 N 次单独查询
+        return userService.countBySalesmanIds(salesmanIds);
     }
 
     /**
-     * 获取本月新增客户数量Map
+     * 获取本月新增客户数量Map（批量查询优化，解决 N+1 问题）
      */
     private Map<Integer, Integer> getMonthNewCustomerCountMap(List<Integer> salesmanIds) {
         if (salesmanIds.isEmpty()) {
             return new HashMap<>();
         }
-        Map<Integer, Integer> result = new HashMap<>();
-        for (Integer id : salesmanIds) {
-            result.put(id, getMonthNewCustomerCount(id));
-        }
-        return result;
+        // 使用批量 GROUP BY 查询替代 N 次单独查询
+        return userService.countMonthNewBySalesmanIds(salesmanIds);
     }
 
     /**

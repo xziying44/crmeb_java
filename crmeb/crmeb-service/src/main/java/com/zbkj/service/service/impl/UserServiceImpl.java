@@ -1764,4 +1764,65 @@ public class UserServiceImpl extends ServiceImpl<UserDao, User> implements UserS
         luw.eq(User::getUid, uid);
         return update(luw);
     }
+
+    /**
+     * 批量统计业务员客户数量（使用 GROUP BY 优化 N+1 查询）
+     * @param salesmanIds 业务员ID列表
+     * @return Map<salesmanId, customerCount>
+     */
+    @Override
+    public Map<Integer, Integer> countBySalesmanIds(List<Integer> salesmanIds) {
+        if (CollUtil.isEmpty(salesmanIds)) {
+            return new HashMap<>();
+        }
+        // 使用 MyBatis-Plus 的 selectMaps 进行 GROUP BY 查询
+        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        wrapper.select("salesman_id", "COUNT(*) as count")
+               .in("salesman_id", salesmanIds)
+               .groupBy("salesman_id");
+        List<Map<String, Object>> results = userDao.selectMaps(wrapper);
+
+        Map<Integer, Integer> resultMap = new HashMap<>();
+        for (Map<String, Object> row : results) {
+            Integer salesmanId = ((Number) row.get("salesman_id")).intValue();
+            Long count = (Long) row.get("count");
+            resultMap.put(salesmanId, count.intValue());
+        }
+        return resultMap;
+    }
+
+    /**
+     * 批量统计业务员本月新增客户数量（使用 GROUP BY 优化 N+1 查询）
+     * @param salesmanIds 业务员ID列表
+     * @return Map<salesmanId, monthNewCount>
+     */
+    @Override
+    public Map<Integer, Integer> countMonthNewBySalesmanIds(List<Integer> salesmanIds) {
+        if (CollUtil.isEmpty(salesmanIds)) {
+            return new HashMap<>();
+        }
+        // 本月开始时间
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Date monthStart = cal.getTime();
+
+        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        wrapper.select("salesman_id", "COUNT(*) as count")
+               .in("salesman_id", salesmanIds)
+               .ge("salesman_bind_time", monthStart)
+               .groupBy("salesman_id");
+        List<Map<String, Object>> results = userDao.selectMaps(wrapper);
+
+        Map<Integer, Integer> resultMap = new HashMap<>();
+        for (Map<String, Object> row : results) {
+            Integer salesmanId = ((Number) row.get("salesman_id")).intValue();
+            Long count = (Long) row.get("count");
+            resultMap.put(salesmanId, count.intValue());
+        }
+        return resultMap;
+    }
 }

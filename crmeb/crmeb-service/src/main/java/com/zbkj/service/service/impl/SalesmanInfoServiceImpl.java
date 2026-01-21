@@ -7,7 +7,7 @@ import com.zbkj.service.dao.SalesmanInfoDao;
 import com.zbkj.service.service.SalesmanInfoService;
 import org.springframework.stereotype.Service;
 
-import java.util.Random;
+import java.security.SecureRandom;
 
 /**
  * 业务员扩展信息服务实现类
@@ -33,6 +33,11 @@ public class SalesmanInfoServiceImpl extends ServiceImpl<SalesmanInfoDao, Salesm
      * 邀请码长度（阶段一：6位）
      */
     private static final int CODE_LENGTH = 6;
+
+    /**
+     * 使用 SecureRandom 替代 Random，提高邀请码安全性
+     */
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     @Override
     public SalesmanInfo getByAdminId(Integer adminId) {
@@ -82,13 +87,12 @@ public class SalesmanInfoServiceImpl extends ServiceImpl<SalesmanInfoDao, Salesm
     }
 
     /**
-     * 生成随机邀请码
+     * 生成随机邀请码（使用安全随机数）
      */
     private String generateRandomCode() {
-        Random random = new Random();
         StringBuilder sb = new StringBuilder(CODE_LENGTH);
         for (int i = 0; i < CODE_LENGTH; i++) {
-            sb.append(CODE_CHARS.charAt(random.nextInt(CODE_CHARS.length())));
+            sb.append(CODE_CHARS.charAt(SECURE_RANDOM.nextInt(CODE_CHARS.length())));
         }
         return sb.toString();
     }

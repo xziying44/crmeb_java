@@ -323,4 +323,18 @@ public interface UserService extends IService<User> {
      */
     User getInfoByUid(Integer id);
 
+    /**
+     * 批量统计业务员客户数量
+     * @param salesmanIds 业务员ID列表
+     * @return Map<salesmanId, customerCount>
+     */
+    Map<Integer, Integer> countBySalesmanIds(List<Integer> salesmanIds);
+
+    /**
+     * 批量统计业务员本月新增客户数量
+     * @param salesmanIds 业务员ID列表
+     * @return Map<salesmanId, monthNewCount>
+     */
+    Map<Integer, Integer> countMonthNewBySalesmanIds(List<Integer> salesmanIds);
+
 }

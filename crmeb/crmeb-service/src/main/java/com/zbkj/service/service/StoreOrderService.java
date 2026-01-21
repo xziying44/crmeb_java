@@ -6,6 +6,7 @@ import com.github.pagehelper.PageInfo;
 import com.zbkj.common.page.CommonPage;
 import com.zbkj.common.request.*;
 import com.zbkj.common.response.*;
+import com.zbkj.common.vo.CustomerConsumeStatsVo;
 import com.zbkj.common.vo.ExpressSheetVo;
 import com.zbkj.common.vo.LogisticsResultVo;
 import com.zbkj.common.model.order.StoreOrder;
@@ -421,4 +422,11 @@ public interface StoreOrderService extends IService<StoreOrder> {
      * @param jsonObject 回调结果
      */
     void expressForOnePassShipmentCancelCallBack(JSONObject jsonObject);
+
+    /**
+     * 批量获取用户消费统计
+     * @param uids 用户ID列表
+     * @return Map<uid, CustomerConsumeStatsVo>
+     */
+    Map<Integer, CustomerConsumeStatsVo> getConsumeStatsByUids(List<Integer> uids);
 }

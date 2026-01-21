@@ -146,6 +146,7 @@ public class SalesmanController {
         return CommonResult.success(salesmanService.getRanking(limit));
     }
 
+    @PreAuthorize("hasAuthority('admin:salesman:list')")
     @ApiOperation(value = "获取所有业务员列表（下拉选择用）")
     @GetMapping("/allList")
     public CommonResult<List<SalesmanResponse>> allList() {

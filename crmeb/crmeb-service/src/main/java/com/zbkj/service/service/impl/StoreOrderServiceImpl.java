@@ -2342,5 +2342,42 @@ public class StoreOrderServiceImpl extends ServiceImpl<StoreOrderDao, StoreOrder
         }
     }
 
+    /**
+     * 批量获取用户消费统计
+     * @param uids 用户ID列表
+     * @return Map<uid, CustomerConsumeStatsVo>
+     */
+    @Override
+    public Map<Integer, CustomerConsumeStatsVo> getConsumeStatsByUids(List<Integer> uids) {
+        if (CollUtil.isEmpty(uids)) {
+            return new HashMap<>();
+        }
+
+        // 查询已完成订单的消费统计（已支付且已收货/已完成的订单）
+        QueryWrapper<StoreOrder> wrapper = new QueryWrapper<>();
+        wrapper.select("uid",
+                       "SUM(pay_price) as total_amount",
+                       "COUNT(*) as order_count",
+                       "MAX(create_time) as last_order_time")
+               .in("uid", uids)
+               .eq("paid", 1)  // 已支付
+               .in("status", Arrays.asList(2, 3))  // 2=已收货, 3=已完成
+               .eq("is_del", 0)
+               .groupBy("uid");
+
+        List<Map<String, Object>> results = dao.selectMaps(wrapper);
+
+        Map<Integer, CustomerConsumeStatsVo> resultMap = new HashMap<>();
+        for (Map<String, Object> row : results) {
+            CustomerConsumeStatsVo stats = new CustomerConsumeStatsVo();
+            stats.setUid(((Number) row.get("uid")).intValue());
+            stats.setTotalAmount((BigDecimal) row.get("total_amount"));
+            stats.setOrderCount(((Number) row.get("order_count")).intValue());
+            stats.setLastOrderTime((Date) row.get("last_order_time"));
+            resultMap.put(stats.getUid(), stats);
+        }
+        return resultMap;
+    }
+
 }
 
