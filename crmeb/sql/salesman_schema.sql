@@ -4,7 +4,12 @@
 -- 1) 本脚本尽量保持可重复执行（通过 EXISTS/条件插入避免重复数据）
 -- 2) 正式执行前请在测试库验证无误
 -- 3) 适配 MySQL 8.0 和现有 eb_system_menu 表结构（无 path 字段）
+-- 4) 重要：执行前请确保客户端使用 utf8mb4 字符集
 -- =====================================================
+
+-- 设置字符集（防止中文乱码）
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
 
 -- 1. eb_system_role 新增字段：是否业务员角色
 -- 提示：如重复执行遇到"Duplicate column name"可忽略
@@ -60,7 +65,7 @@ SET @parent_id = (
 
 -- 子菜单：业务员列表
 INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
-SELECT @parent_id, '业务员列表', '', 'admin:salesman:list', 'C', 'salesman/list/index', 1, 1, NOW(), NOW()
+SELECT @parent_id, '业务员列表', '', 'admin:salesman:list', 'C', '/salesman/list', 1, 1, NOW(), NOW()
 FROM DUAL
 WHERE NOT EXISTS (
   SELECT 1 FROM eb_system_menu WHERE perms = 'admin:salesman:list'
@@ -68,7 +73,7 @@ WHERE NOT EXISTS (
 
 -- 子菜单：客户绑定记录
 INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
-SELECT @parent_id, '客户绑定记录', '', 'admin:salesman:bindList', 'C', 'salesman/bindList/index', 2, 1, NOW(), NOW()
+SELECT @parent_id, '客户绑定记录', '', 'admin:salesman:bindList', 'C', '/salesman/bindList', 2, 1, NOW(), NOW()
 FROM DUAL
 WHERE NOT EXISTS (
   SELECT 1 FROM eb_system_menu WHERE perms = 'admin:salesman:bindList'
@@ -76,7 +81,7 @@ WHERE NOT EXISTS (
 
 -- 子菜单：业绩统计
 INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
-SELECT @parent_id, '业绩统计', '', 'admin:salesman:statistics', 'C', 'salesman/statistics/index', 3, 1, NOW(), NOW()
+SELECT @parent_id, '业绩统计', '', 'admin:salesman:statistics', 'C', '/salesman/statistics', 3, 1, NOW(), NOW()
 FROM DUAL
 WHERE NOT EXISTS (
   SELECT 1 FROM eb_system_menu WHERE perms = 'admin:salesman:statistics'
