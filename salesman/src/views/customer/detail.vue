@@ -35,7 +35,7 @@
           <div class="text-sm text-gray-500 mt-1">订单数</div>
         </div>
         <div class="text-center border-x border-gray-100">
-          <div class="text-xl font-bold text-primary">¥{{ customer.totalAmount.toFixed(2) }}</div>
+          <div class="text-xl font-bold text-primary">¥{{ formatAmount(customer.totalAmount) }}</div>
           <div class="text-sm text-gray-500 mt-1">消费金额</div>
         </div>
         <div class="text-center">
@@ -110,6 +110,15 @@ const bindDays = computed(() => {
 function formatDate(dateStr: string): string {
   if (!dateStr) return '-'
   return new Date(dateStr).toLocaleDateString()
+}
+
+/**
+ * 格式化金额，处理 BigDecimal 序列化为字符串的情况
+ */
+function formatAmount(amount: number | string | null | undefined): string {
+  if (amount == null) return '0.00'
+  const num = typeof amount === 'string' ? parseFloat(amount) : amount
+  return isNaN(num) ? '0.00' : num.toFixed(2)
 }
 
 async function fetchDetail() {

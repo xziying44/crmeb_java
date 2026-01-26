@@ -363,6 +363,51 @@ public class SalesmanServiceImpl implements SalesmanService {
     }
 
     @Override
+    public CustomerBindRecordVo getCustomerDetail(Integer salesmanId, Integer uid) {
+        // 查询用户
+        User user = userService.getById(uid);
+        if (user == null) {
+            throw new CrmebException("客户不存在");
+        }
+
+        // 验证该客户是否属于当前业务员
+        if (!user.getSalesmanId().equals(salesmanId)) {
+            throw new CrmebException("无权查看该客户");
+        }
+
+        // 组装响应
+        CustomerBindRecordVo vo = new CustomerBindRecordVo();
+        vo.setUid(user.getUid());
+        vo.setNickname(user.getNickname());
+        vo.setPhone(user.getPhone());
+        vo.setAvatar(user.getAvatar());
+        vo.setSalesmanId(user.getSalesmanId());
+        vo.setBindTime(user.getSalesmanBindTime());
+
+        // 获取业务员名称
+        SystemAdmin admin = systemAdminService.getById(user.getSalesmanId());
+        if (admin != null) {
+            vo.setSalesmanName(admin.getRealName());
+        }
+
+        // 获取消费统计
+        List<Integer> userIds = new ArrayList<>();
+        userIds.add(uid);
+        Map<Integer, CustomerConsumeStatsVo> consumeStatsMap = storeOrderService.getConsumeStatsByUids(userIds);
+        CustomerConsumeStatsVo stats = consumeStatsMap.get(uid);
+        if (stats != null) {
+            vo.setTotalAmount(stats.getTotalAmount());
+            vo.setOrderCount(stats.getOrderCount());
+            vo.setLastOrderTime(stats.getLastOrderTime());
+        } else {
+            vo.setTotalAmount(BigDecimal.ZERO);
+            vo.setOrderCount(0);
+        }
+
+        return vo;
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean transferCustomer(CustomerTransferRequest request) {
         User user = userService.getById(request.getUid());

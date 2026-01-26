@@ -10,6 +10,7 @@ crmeb:
   imagePath: /你的站点绝对路径 建议jar包位置/ # 服务器图片路径配置 斜杠结尾
   captchaOn: false # 是否开启行为验证码
   demoSite: true # 是否演示站点 所有手机号码都会掩码
+  miniQrcodeEnvVersion: trial # 小程序码环境版本：develop-开发版, trial-体验版, release-正式版
 
 server:
   port: 20008

@@ -82,8 +82,8 @@ public class SalesmanApiController {
     @ApiOperation(value = "客户详情")
     @GetMapping("/customer/detail/{uid}")
     public CommonResult<CustomerBindRecordVo> customerDetail(@PathVariable Integer uid) {
-        // TODO: 实现客户详情
-        return CommonResult.success(new CustomerBindRecordVo());
+        Integer adminId = systemAdminService.getLoginAdminId();
+        return CommonResult.success(salesmanService.getCustomerDetail(adminId, uid));
     }
 
     @ApiOperation(value = "添加客户-发送验证码")

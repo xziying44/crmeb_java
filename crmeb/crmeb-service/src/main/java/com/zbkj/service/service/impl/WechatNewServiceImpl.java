@@ -258,6 +258,11 @@ public class WechatNewServiceImpl implements WechatNewService {
         // 设置 check_path=false，允许小程序未发布或页面不存在时也能生成小程序码
         // 注意：此模式下 page 有数量上限（60000个），请勿滥用
         map.put("check_path", false);
+        // 设置小程序码环境版本：release-正式版, trial-体验版, develop-开发版
+        String envVersion = crmebConfig.getMiniQrcodeEnvVersion();
+        if (StrUtil.isNotBlank(envVersion)) {
+            map.put("env_version", envVersion);
+        }
         byte[] bytes = restTemplateUtil.postJsonDataAndReturnBuffer(url, new JSONObject(map));
         String response = new String(bytes);
         if (StringUtils.contains(response,"errcode")) {
@@ -305,6 +310,13 @@ public class WechatNewServiceImpl implements WechatNewService {
     public String createQrCode(JSONObject jsonObject) {
         String miniAccessToken = getMiniAccessToken();
         String url = StrUtil.format(WeChatConstants.WECHAT_MINI_QRCODE_UNLIMITED_URL, miniAccessToken);
+        // 如果前端没有传入 env_version，则使用配置中的值
+        if (!jsonObject.containsKey("env_version") || StrUtil.isBlank(jsonObject.getString("env_version"))) {
+            String envVersion = crmebConfig.getMiniQrcodeEnvVersion();
+            if (StrUtil.isNotBlank(envVersion)) {
+                jsonObject.put("env_version", envVersion);
+            }
+        }
         logger.info("微信小程序码生成参数:{}", jsonObject);
         byte[] bytes = restTemplateUtil.postJsonDataAndReturnBuffer(url, jsonObject);
         String response = new String(bytes);

@@ -67,10 +67,16 @@ const page = ref(1)
 const limit = 10
 
 async function fetchList(isRefresh = false) {
+  // 防止重复请求
+  if (loading.value && !isRefresh) return
+
   if (isRefresh) {
     page.value = 1
     finished.value = false
+    list.value = []
   }
+
+  loading.value = true
 
   try {
     const result = await getCustomerListApi({
@@ -79,11 +85,8 @@ async function fetchList(isRefresh = false) {
       keywords: keywords.value || undefined
     })
 
-    if (isRefresh) {
-      list.value = result.list
-    } else {
-      list.value.push(...result.list)
-    }
+    // isRefresh 时 list 已清空，统一用 push
+    list.value.push(...result.list)
 
     if (list.value.length >= result.total) {
       finished.value = true

@@ -44,6 +44,9 @@ public class CrmebConfig {
     // 活动边框参加 指定商品参加上限
     private Integer selectProductLimit;
 
+    // 小程序码环境版本：release-正式版, trial-体验版, develop-开发版
+    private String miniQrcodeEnvVersion = "release";
+
     // 不过滤任何数据的url配置
     private List<String> ignored;
 
@@ -142,6 +145,14 @@ public class CrmebConfig {
 
     public void setSelectProductLimit(Integer selectProductLimit) {
         this.selectProductLimit = selectProductLimit;
+    }
+
+    public String getMiniQrcodeEnvVersion() {
+        return miniQrcodeEnvVersion;
+    }
+
+    public void setMiniQrcodeEnvVersion(String miniQrcodeEnvVersion) {
+        this.miniQrcodeEnvVersion = miniQrcodeEnvVersion;
     }
 
     @Override

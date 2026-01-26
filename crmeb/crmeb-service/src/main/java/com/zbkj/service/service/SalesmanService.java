@@ -68,6 +68,11 @@ public interface SalesmanService {
     CommonPage<CustomerBindRecordVo> getBindList(Integer salesmanId, String keywords, PageParamRequest pageRequest);
 
     /**
+     * 获取客户详情（业务员端）
+     */
+    CustomerBindRecordVo getCustomerDetail(Integer salesmanId, Integer uid);
+
+    /**
      * 转移客户
      */
     Boolean transferCustomer(CustomerTransferRequest request);

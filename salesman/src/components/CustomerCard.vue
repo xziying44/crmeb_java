@@ -16,7 +16,7 @@
             {{ customer.nickname || customer.phone }}
           </div>
           <div class="text-primary font-medium">
-            ¥{{ customer.totalAmount.toFixed(2) }}
+            ¥{{ formatAmount(customer.totalAmount) }}
           </div>
         </div>
         <div class="flex items-center justify-between mt-1">
@@ -49,6 +49,15 @@ const defaultAvatar = 'https://img.yzcdn.cn/vant/cat.jpeg'
 function formatDate(dateStr: string): string {
   if (!dateStr) return '-'
   return new Date(dateStr).toLocaleDateString()
+}
+
+/**
+ * 格式化金额，处理 BigDecimal 序列化为字符串的情况
+ */
+function formatAmount(amount: number | string | null | undefined): string {
+  if (amount == null) return '0.00'
+  const num = typeof amount === 'string' ? parseFloat(amount) : amount
+  return isNaN(num) ? '0.00' : num.toFixed(2)
 }
 
 function handleClick() {
