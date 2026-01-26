@@ -112,7 +112,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             // 跨域预检请求
 //            .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             // 对于登录login 验证码captchaImage 和其他放行的目录 允许匿名访问"/citylife/front/**"
-            .antMatchers("/api/admin/login", "/api/admin/validate/code/get").permitAll()
+            .antMatchers("/api/admin/login", "/api/admin/validate/code/get", "/api/admin/salesman/app/login").permitAll()
             .antMatchers("/api/admin/getLoginPic").permitAll()
             .antMatchers("/api/admin/login/account/detection").permitAll()
             .antMatchers("/api/admin/validate/code/getcaptchaconfig").permitAll()
