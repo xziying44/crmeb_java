@@ -243,7 +243,7 @@ public class WechatNewServiceImpl implements WechatNewService {
 
     /**
      * 生成小程序码
-     * @param page 必须是已经发布的小程序存在的页面
+     * @param page 小程序页面路径（如未发布或页面不存在，也能生成，但有数量上限）
      * @param scene 最大32个可见字符，只支持数字，大小写英文以及部分特殊字符：!#$&'()*+,/:;=?@-._~，其它字符请自行编码为合法字符
      * @return 小程序码
      */
@@ -255,6 +255,9 @@ public class WechatNewServiceImpl implements WechatNewService {
         map.put("scene", scene);
         map.put("page", page);
         map.put("width", 200);
+        // 设置 check_path=false，允许小程序未发布或页面不存在时也能生成小程序码
+        // 注意：此模式下 page 有数量上限（60000个），请勿滥用
+        map.put("check_path", false);
         byte[] bytes = restTemplateUtil.postJsonDataAndReturnBuffer(url, new JSONObject(map));
         String response = new String(bytes);
         if (StringUtils.contains(response,"errcode")) {
