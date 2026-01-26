@@ -50,9 +50,9 @@ WHERE NOT EXISTS (
 );
 
 -- 5. 创建业务员专属菜单（注意：eb_system_menu 表无 path 字段，使用 component 存储路由）
--- 父菜单：业务员管理
+-- 父菜单：业务
 INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
-SELECT 0, '业务员管理', 'el-icon-user', '', 'M', '/salesman', 100, 1, NOW(), NOW()
+SELECT 0, '业务', 'user-solid', '', 'M', '/salesman', 100, 1, NOW(), NOW()
 FROM DUAL
 WHERE NOT EXISTS (
   SELECT 1 FROM eb_system_menu WHERE component = '/salesman' AND menu_type = 'M'

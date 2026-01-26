@@ -11,7 +11,7 @@
           <el-form-item label="关键字：">
             <el-input v-model="listPram.keywords" placeholder="昵称/手机号" class="selWidth" size="small" clearable />
           </el-form-item>
-          <div class="ml30">
+          <div class="ml30 mb20">
             <el-button type="primary" size="small" @click="handleSearch">搜索</el-button>
             <el-button size="small" @click="handleReset">重置</el-button>
           </div>

@@ -13,7 +13,7 @@
               <el-option label="已取消" :value="2" />
             </el-select>
           </el-form-item>
-          <div class="ml30">
+          <div class="ml30 mb20">
             <el-button type="primary" size="small" @click="handleSearch">搜索</el-button>
             <el-button size="small" @click="handleReset">重置</el-button>
             <el-button type="success" size="small" @click="openCreate" v-hasPermi="['admin:stock:check:create']"
@@ -280,4 +280,14 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+/* 修复弹窗表格粘连问题 */
+::v-deep .el-dialog .el-table .el-table__cell {
+  padding: 8px 0;
+}
+::v-deep .el-dialog .el-table .cell {
+  padding: 0 10px;
+}
+</style>
 

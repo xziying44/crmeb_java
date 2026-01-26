@@ -16,8 +16,8 @@ const salesmanRouter = {
   redirect: '/salesman/list',
   name: 'Salesman',
   meta: {
-    title: '业务员管理',
-    icon: 'el-icon-user',
+    title: '业务',
+    icon: 'user-solid',
   },
   children: [
     {

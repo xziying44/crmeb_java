@@ -19,7 +19,7 @@
               <el-option label="已取消" :value="3" />
             </el-select>
           </el-form-item>
-          <div class="ml30">
+          <div class="ml30 mb20">
             <el-button type="primary" size="small" @click="handleSearch">搜索</el-button>
             <el-button size="small" @click="handleReset">重置</el-button>
             <el-button type="success" size="small" @click="openCreate" v-hasPermi="['admin:stock:purchase:add']"
@@ -76,8 +76,8 @@
     </el-card>
 
     <!-- 创建采购单 -->
-    <el-dialog title="创建采购单" :visible.sync="createDialogVisible" width="860px" :close-on-click-modal="false">
-      <el-form ref="createFormRef" :model="createForm" :rules="createRules" label-width="90px" size="small">
+    <el-dialog title="创建采购单" :visible.sync="createDialogVisible" width="900px" :close-on-click-modal="false">
+      <el-form ref="createFormRef" :model="createForm" :rules="createRules" label-width="80px" size="small">
         <el-form-item label="供应商" prop="supplierId">
           <el-select v-model="createForm.supplierId" placeholder="请选择供应商" class="selWidth">
             <el-option v-for="s in supplierOptions" :key="s.id" :label="s.name" :value="s.id" />
@@ -89,52 +89,52 @@
 
         <el-form-item label="采购明细">
           <el-button size="mini" type="primary" @click="addItem">新增明细</el-button>
-          <el-table :data="createForm.items" size="mini" class="mt10" border>
-            <el-table-column label="商品" min-width="240">
-              <template slot-scope="scope">
-                <div class="acea-row row-middle">
-                  <div class="mini-img mr10" @click="changeGood(scope.$index)">
-                    <img v-if="scope.row.productImage" :src="scope.row.productImage" />
-                    <i v-else class="el-icon-camera" />
-                  </div>
-                  <div class="line2" style="flex: 1">
-                    <div>{{ scope.row.productName || '点击选择商品' }}</div>
-                    <div class="gray" v-if="scope.row.productId">ID: {{ scope.row.productId }}</div>
-                  </div>
-                </div>
-              </template>
-            </el-table-column>
-            <el-table-column label="规格" min-width="200">
-              <template slot-scope="scope">
-                <el-select
-                  v-model="scope.row.attrValueId"
-                  placeholder="无规格可不选"
-                  clearable
-                  size="mini"
-                  style="width: 180px"
-                  :disabled="!scope.row.skuOptions || !scope.row.skuOptions.length"
-                >
-                  <el-option v-for="s in scope.row.skuOptions" :key="s.value" :label="s.label" :value="s.value" />
-                </el-select>
-              </template>
-            </el-table-column>
-            <el-table-column label="数量" width="110">
-              <template slot-scope="scope">
-                <el-input-number v-model="scope.row.quantity" :min="1" :max="999999" size="mini" />
-              </template>
-            </el-table-column>
-            <el-table-column label="单价" width="140">
-              <template slot-scope="scope">
-                <el-input-number v-model="scope.row.price" :min="0" :max="999999" :precision="2" size="mini" />
-              </template>
-            </el-table-column>
-            <el-table-column label="操作" width="80" fixed="right">
-              <template slot-scope="scope">
-                <a @click="removeItem(scope.$index)">删除</a>
-              </template>
-            </el-table-column>
-          </el-table>
         </el-form-item>
+        <el-table :data="createForm.items" size="mini" class="purchase-table" border>
+          <el-table-column label="商品" min-width="200">
+            <template slot-scope="scope">
+              <div class="acea-row row-middle">
+                <div class="mini-img mr10" @click="changeGood(scope.$index)">
+                  <img v-if="scope.row.productImage" :src="scope.row.productImage" />
+                  <i v-else class="el-icon-camera" />
+                </div>
+                <div class="line2" style="flex: 1">
+                  <div>{{ scope.row.productName || '点击选择商品' }}</div>
+                  <div class="gray" v-if="scope.row.productId">ID: {{ scope.row.productId }}</div>
+                </div>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column label="规格" min-width="160">
+            <template slot-scope="scope">
+              <el-select
+                v-model="scope.row.attrValueId"
+                placeholder="无规格可不选"
+                clearable
+                size="mini"
+                style="width: 100%"
+                :disabled="!scope.row.skuOptions || !scope.row.skuOptions.length"
+              >
+                <el-option v-for="s in scope.row.skuOptions" :key="s.value" :label="s.label" :value="s.value" />
+              </el-select>
+            </template>
+          </el-table-column>
+          <el-table-column label="数量" width="120">
+            <template slot-scope="scope">
+              <el-input-number v-model="scope.row.quantity" :min="1" :max="999999" size="mini" :controls="false" style="width: 80px" />
+            </template>
+          </el-table-column>
+          <el-table-column label="单价" width="120">
+            <template slot-scope="scope">
+              <el-input-number v-model="scope.row.price" :min="0" :max="999999" :precision="2" size="mini" :controls="false" style="width: 80px" />
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="60" align="center">
+            <template slot-scope="scope">
+              <a @click="removeItem(scope.$index)">删除</a>
+            </template>
+          </el-table-column>
+        </el-table>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button size="small" @click="createDialogVisible = false">取消</el-button>
@@ -432,6 +432,17 @@ export default {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+}
+/* 采购明细表格样式 */
+.purchase-table {
+  margin-top: 10px;
+}
+/* 修复弹窗表格单元格间距 */
+::v-deep .el-dialog .el-table .el-table__cell {
+  padding: 10px 0;
+}
+::v-deep .el-dialog .el-table .cell {
+  padding: 0 8px;
 }
 </style>
 

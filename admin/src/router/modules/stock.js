@@ -16,8 +16,8 @@ const stockRouter = {
   redirect: '/stock/list',
   name: 'Stock',
   meta: {
-    title: '进销存',
-    icon: 'el-icon-box',
+    title: '库存',
+    icon: 's-goods',
   },
   children: [
     {

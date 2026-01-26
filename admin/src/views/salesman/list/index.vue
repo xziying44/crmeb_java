@@ -18,7 +18,7 @@
               <el-option label="禁用" :value="false" />
             </el-select>
           </el-form-item>
-          <div class="ml30">
+          <div class="ml30 mb20">
             <el-button type="primary" size="small" @click="handleSearch">搜索</el-button>
             <el-button size="small" @click="handleReset">重置</el-button>
             <el-button type="success" size="small" @click="openCreate" v-hasPermi="['admin:salesman:save']"
