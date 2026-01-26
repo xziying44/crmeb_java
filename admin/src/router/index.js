@@ -31,6 +31,7 @@ import appSettingRouter from './modules/appSetting';
 import maintainRouter from './modules/maintain';
 import mobileRouter from './modules/mobile';
 import designRouter from './modules/design';
+import stockRouter from './modules/stock';
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
@@ -71,6 +72,8 @@ export const constantRoutes = [
   distributionRouter,
   // 业务员
   salesmanRouter,
+  // 进销存
+  stockRouter,
   // 营销
   marketingRouter,
   // 财务

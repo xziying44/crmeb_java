@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zbkj.common.exception.CrmebException;
 import com.zbkj.common.model.product.StoreProductAttrValue;
+import com.zbkj.service.dao.StockDao;
 import com.zbkj.service.dao.StoreProductAttrValueDao;
 import com.zbkj.service.service.StoreProductAttrValueService;
 import com.zbkj.service.service.SystemConfigService;
@@ -35,6 +36,9 @@ public class StoreProductAttrValueServiceImpl extends ServiceImpl<StoreProductAt
 
     @Resource
     private StoreProductAttrValueDao dao;
+
+    @Resource
+    private StockDao stockDao;
 
     @Autowired
     private SystemConfigService systemConfigService;
@@ -157,6 +161,11 @@ public class StoreProductAttrValueServiceImpl extends ServiceImpl<StoreProductAt
         if (!update) {
             throw new CrmebException("更新商品attrValue失败，attrValueId = " + id);
         }
+
+        // 仅同步普通商品规格库存到进销存库存（type=0）
+        if (type == 0) {
+            syncInventoryStock(id);
+        }
         return update;
     }
 
@@ -182,7 +191,21 @@ public class StoreProductAttrValueServiceImpl extends ServiceImpl<StoreProductAt
         if (!update) {
             throw new CrmebException("更新商品attrValue失败，attrValueId = " + id);
         }
+
+        // 该重载仅用于普通商品规格库存操作
+        syncInventoryStock(id);
         return update;
+    }
+
+    /**
+     * 将商品规格库存同步到进销存库存表（不写流水，保持库存数一致）
+     */
+    private void syncInventoryStock(Integer attrValueId) {
+        StoreProductAttrValue attrValue = getById(attrValueId);
+        if (attrValue == null) {
+            return;
+        }
+        stockDao.upsertStock(attrValue.getProductId(), attrValue.getId(), attrValue.getStock());
     }
 
     /**
@@ -230,4 +253,3 @@ public class StoreProductAttrValueServiceImpl extends ServiceImpl<StoreProductAt
         return dao.selectList(lqw);
     }
 }
-

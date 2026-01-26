@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zbkj.service.dao.StockLogDao">
+
+    <select id="selectLogList" resultType="com.zbkj.common.response.StockLogResponse">
+        SELECT
+            l.id AS id,
+            l.product_id AS productId,
+            p.store_name AS productName,
+            p.image AS productImage,
+            l.attr_value_id AS attrValueId,
+            IFNULL(v.suk, '') AS skuName,
+            l.type AS type,
+            l.quantity AS quantity,
+            l.before_stock AS beforeStock,
+            l.after_stock AS afterStock,
+            l.relation_id AS relationId,
+            l.relation_type AS relationType,
+            l.operator_name AS operatorName,
+            l.remark AS remark,
+            l.create_time AS createTime
+        FROM eb_stock_log l
+        LEFT JOIN eb_store_product p ON p.id = l.product_id
+        LEFT JOIN eb_store_product_attr_value v ON v.id = l.attr_value_id
+        WHERE 1 = 1
+        <if test="productId != null">
+            AND l.product_id = #{productId}
+        </if>
+        <if test="type != null">
+            AND l.type = #{type}
+        </if>
+        ORDER BY l.id DESC
+    </select>
+
+    <select id="reportSummary" resultType="java.util.HashMap">
+        SELECT
+            type,
+            SUM(CASE WHEN quantity &gt; 0 THEN quantity ELSE 0 END) AS inQuantity,
+            SUM(CASE WHEN quantity &lt; 0 THEN -quantity ELSE 0 END) AS outQuantity,
+            SUM(quantity) AS netQuantity
+        FROM eb_stock_log
+        WHERE 1 = 1
+        <if test="startTime != null">
+            AND create_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND create_time &lt;= #{endTime}
+        </if>
+        GROUP BY type
+        ORDER BY type ASC
+    </select>
+
+</mapper>

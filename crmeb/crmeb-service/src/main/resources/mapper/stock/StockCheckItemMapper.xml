@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zbkj.service.dao.StockCheckItemDao">
+
+    <select id="reportCheckDiff" resultType="java.util.HashMap">
+        SELECT
+            c.check_no AS checkNo,
+            c.create_time AS createTime,
+            c.finish_time AS finishTime,
+            i.product_id AS productId,
+            i.product_name AS productName,
+            i.sku_name AS skuName,
+            i.system_stock AS systemStock,
+            i.actual_stock AS actualStock,
+            i.diff_quantity AS diffQuantity
+        FROM eb_stock_check_item i
+        INNER JOIN eb_stock_check c ON c.id = i.check_id
+        WHERE 1 = 1
+        AND i.diff_quantity != 0
+        <if test="startTime != null">
+            AND c.create_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND c.create_time &lt;= #{endTime}
+        </if>
+        ORDER BY c.id DESC, i.id DESC
+    </select>
+
+</mapper>
+

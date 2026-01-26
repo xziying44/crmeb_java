@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zbkj.service.dao.PurchaseDao">
+
+    <select id="reportPurchase" resultType="java.util.HashMap">
+        SELECT
+            p.supplier_id AS supplierId,
+            IFNULL(s.name, '') AS supplierName,
+            SUM(p.total_quantity) AS totalQuantity,
+            SUM(p.total_amount) AS totalAmount,
+            COUNT(1) AS purchaseCount
+        FROM eb_purchase p
+        LEFT JOIN eb_supplier s ON s.id = p.supplier_id
+        WHERE 1 = 1
+        AND p.status != 3
+        <if test="startTime != null">
+            AND p.create_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND p.create_time &lt;= #{endTime}
+        </if>
+        GROUP BY p.supplier_id
+        ORDER BY totalAmount DESC
+    </select>
+
+</mapper>
+

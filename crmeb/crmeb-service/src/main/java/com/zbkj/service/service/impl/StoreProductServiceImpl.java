@@ -33,6 +33,7 @@ import com.zbkj.common.utils.CrmebUtil;
 import com.zbkj.common.utils.CrmebDateUtil;
 import com.zbkj.common.utils.RedisUtil;
 import com.zbkj.common.vo.MyRecord;
+import com.zbkj.service.dao.StockDao;
 import com.zbkj.service.dao.StoreProductDao;
 import com.zbkj.service.delete.ProductUtils;
 import com.zbkj.service.service.*;
@@ -66,6 +67,9 @@ public class StoreProductServiceImpl extends ServiceImpl<StoreProductDao, StoreP
 
     @Resource
     private StoreProductDao dao;
+
+    @Resource
+    private StockDao stockDao;
 
     @Autowired
     private StoreProductAttrService attrService;
@@ -993,6 +997,10 @@ public class StoreProductServiceImpl extends ServiceImpl<StoreProductDao, StoreP
             attrValue.setStock(productAttrStock);
             attrValue.setSales(attrValue.getSales()-storeProductStockRequest.getNum());
             storeProductAttrValueService.updateById(attrValue);
+            // 同步普通商品规格库存到进销存库存表（不写流水）
+            if (Constants.PRODUCT_TYPE_NORMAL.equals(storeProductStockRequest.getType())) {
+                stockDao.upsertStock(attrValue.getProductId(), attrValue.getId(), attrValue.getStock());
+            }
         }
         return true;
     }
@@ -1521,4 +1529,3 @@ public class StoreProductServiceImpl extends ServiceImpl<StoreProductDao, StoreP
         lqw.eq(StoreProduct::getIsShow, true);
     }
 }
-

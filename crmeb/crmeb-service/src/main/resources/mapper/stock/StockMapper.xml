@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zbkj.service.dao.StockDao">
+
+    <select id="selectStockList" resultType="com.zbkj.common.response.StockResponse">
+        SELECT
+            s.id AS id,
+            s.product_id AS productId,
+            p.store_name AS productName,
+            p.image AS productImage,
+            s.attr_value_id AS attrValueId,
+            IFNULL(v.suk, '') AS skuName,
+            s.stock AS stock,
+            s.warning_stock AS warningStock,
+            CASE WHEN s.warning_stock &gt; 0 AND s.stock &lt;= s.warning_stock THEN 1 ELSE 0 END AS isWarning,
+            s.update_time AS updateTime
+        FROM eb_stock s
+        LEFT JOIN eb_store_product p ON p.id = s.product_id
+        LEFT JOIN eb_store_product_attr_value v ON v.id = s.attr_value_id
+        WHERE 1 = 1
+        AND (p.is_del = 0 OR p.is_del IS NULL)
+        <if test="keywords != null and keywords != ''">
+            AND p.store_name LIKE CONCAT('%', #{keywords}, '%')
+        </if>
+        <if test="warning != null and warning">
+            AND s.warning_stock &gt; 0 AND s.stock &lt;= s.warning_stock
+        </if>
+        ORDER BY s.update_time DESC, s.id DESC
+    </select>
+
+    <select id="sumStockByProductId" resultType="java.lang.Integer">
+        SELECT IFNULL(SUM(stock), 0) FROM eb_stock WHERE product_id = #{productId}
+    </select>
+
+</mapper>
+
