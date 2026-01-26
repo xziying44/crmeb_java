@@ -224,17 +224,21 @@ public class SalesmanServiceImpl implements SalesmanService {
         }
 
         // 更新管理员信息
+        // 注意：SystemAdminUpdateRequest 要求 account/roles/status 等字段必填，需要从现有数据补充
         SystemAdminUpdateRequest adminRequest = new SystemAdminUpdateRequest();
         adminRequest.setId(request.getId());
-        if (StrUtil.isNotBlank(request.getRealName())) {
-            adminRequest.setRealName(request.getRealName());
-        }
-        if (StrUtil.isNotBlank(request.getPhone())) {
-            adminRequest.setPhone(request.getPhone());
-        }
-        if (StrUtil.isNotBlank(request.getPwd())) {
-            adminRequest.setPwd(request.getPwd());
-        }
+        adminRequest.setAccount(admin.getAccount());  // 从现有数据获取账号（必填）
+        adminRequest.setRoles(admin.getRoles());      // 保持原角色不变（必填）
+        adminRequest.setStatus(admin.getStatus());    // 保持原状态不变（必填）
+
+        // 设置可更新字段，如果未传则使用原值
+        adminRequest.setRealName(StrUtil.isNotBlank(request.getRealName()) ? request.getRealName() : admin.getRealName());
+        adminRequest.setPhone(StrUtil.isNotBlank(request.getPhone()) ? request.getPhone() : admin.getPhone());
+
+        // 密码：只有传入时才更新，否则传 null（updateAdmin 内部会忽略空密码）
+        // 注意：虽然 SystemAdminUpdateRequest.pwd 有 @NotNull 注解，但内部调用不经过 Controller 验证
+        adminRequest.setPwd(StrUtil.isNotBlank(request.getPwd()) ? request.getPwd() : null);
+
         systemAdminService.updateAdmin(adminRequest);
 
         // 更新业务员扩展信息

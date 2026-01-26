@@ -14,7 +14,8 @@ service.interceptors.request.use(
   (config) => {
     const token = getToken()
     if (token) {
-      config.headers.Authorization = token
+      // 后端使用非标准请求头 Authori-zation（非 Authorization）
+      config.headers['Authori-zation'] = token
     }
     return config
   },
