@@ -38,6 +38,9 @@ public class OrderComputedPriceRequest {
     @ApiModelProperty(value = "优惠券id")
     private Integer couponId;
 
+    @ApiModelProperty(value = "代金券ID（用户持有的代金券记录ID）")
+    private Integer voucherId;
+
     @ApiModelProperty(value = "快递类型: 1-快递配送，2-到店自提")
     @NotNull(message = "快递类型不能为空")
     @Range(min = 1, max = 2, message = "未知的快递类型")

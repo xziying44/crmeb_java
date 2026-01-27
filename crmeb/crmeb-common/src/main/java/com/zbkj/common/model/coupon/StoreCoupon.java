@@ -39,6 +39,9 @@ public class StoreCoupon implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
+    @ApiModelProperty(value = "券类型：1-优惠券 2-代金券")
+    private Integer couponType;
+
     @ApiModelProperty(value = "优惠券名称")
     private String name;
 
@@ -62,6 +65,9 @@ public class StoreCoupon implements Serializable {
 
     @ApiModelProperty(value = "最低消费，0代表不限制")
     private BigDecimal minPrice;
+
+    @ApiModelProperty(value = "是否可抵扣运费：0-否 1-是")
+    private Boolean canDeductFreight;
 
     @ApiModelProperty(value = "可领取开始时间")
     private Date receiveStartTime;

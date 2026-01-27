@@ -61,6 +61,43 @@ const marketingRouter = {
       ],
     },
     {
+      path: 'promotion',
+      name: 'promotion',
+      meta: {
+        title: '促销活动',
+      },
+      component: () => import('@/views/marketing/promotion/index'),
+      children: [
+        {
+          path: 'fullReduction',
+          name: 'fullReduction',
+          meta: {
+            title: '满减活动',
+            noCache: true,
+          },
+          component: () => import('@/views/marketing/promotion/fullReduction/index'),
+        },
+        {
+          path: 'buyGift',
+          name: 'buyGift',
+          meta: {
+            title: '买赠活动',
+            noCache: true,
+          },
+          component: () => import('@/views/marketing/promotion/buyGift/index'),
+        },
+      ],
+    },
+    {
+      path: 'voucher',
+      name: 'voucher',
+      meta: {
+        title: '代金券列表',
+        noCache: true,
+      },
+      component: () => import('@/views/marketing/voucher/index'),
+    },
+    {
       path: 'bargain',
       component: () => import('@/views/marketing/bargain/index'),
       name: 'Bargain',

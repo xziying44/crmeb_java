@@ -70,6 +70,9 @@ public class StoreOrderInfo implements Serializable {
     @ApiModelProperty(value = "单价")
     private BigDecimal price;
 
+    @ApiModelProperty(value = "是否赠品：0-否 1-是")
+    private Boolean isGift;
+
     @ApiModelProperty(value = "购买数量")
     private Integer payNum;
 

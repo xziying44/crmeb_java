@@ -9,7 +9,9 @@ import com.zbkj.common.request.StoreCouponRequest;
 import com.zbkj.common.request.StoreCouponSearchRequest;
 import com.zbkj.common.response.StoreCouponFrontResponse;
 import com.zbkj.common.response.StoreCouponInfoResponse;
+import com.zbkj.common.response.StoreCouponUserResponse;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -85,4 +87,21 @@ public interface StoreCouponService extends IService<StoreCoupon> {
      * @param status 状态
      */
     Boolean updateStatus(Integer id, Boolean status);
+
+    /**
+     * 获取代金券列表（后台）
+     */
+    List<StoreCoupon> getVoucherList(StoreCouponSearchRequest request, PageParamRequest pageParamRequest);
+
+    /**
+     * 获取用户可用的代金券列表（用户维度的券记录列表）
+     */
+    List<StoreCouponUserResponse> getUserAvailableVouchers(Integer uid, BigDecimal totalPrice);
+
+    /**
+     * 批量发放代金券/优惠券给用户
+     * @param couponId 优惠券发布ID
+     * @param userIds 用户ID列表（逗号分隔）
+     */
+    Boolean sendCouponToUsers(Integer couponId, String userIds);
 }

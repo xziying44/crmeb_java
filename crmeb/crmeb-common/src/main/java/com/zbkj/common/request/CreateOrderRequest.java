@@ -46,6 +46,9 @@ public class CreateOrderRequest implements Serializable {
     @ApiModelProperty(value = "优惠券编号")
     private Integer couponId;
 
+    @ApiModelProperty(value = "代金券ID（用户持有的代金券记录ID）")
+    private Integer voucherId;
+
 //        @ApiModelProperty(value = "支付类型:weixin-微信支付，yue-余额支付,alipay-支付宝支付")
 //        @NotBlank(message = "支付类型不能为空")
 //        private String payType;

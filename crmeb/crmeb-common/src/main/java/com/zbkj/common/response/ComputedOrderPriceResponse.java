@@ -8,6 +8,7 @@ import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 计算订单价格响应对象
@@ -32,6 +33,27 @@ public class ComputedOrderPriceResponse implements Serializable {
     @ApiModelProperty(value = "优惠券优惠金额")
     private BigDecimal couponFee;
 
+    @ApiModelProperty(value = "满减活动ID")
+    private Integer fullReductionId;
+
+    @ApiModelProperty(value = "满减活动名称")
+    private String fullReductionName;
+
+    @ApiModelProperty(value = "满减金额")
+    private BigDecimal fullReductionPrice;
+
+    @ApiModelProperty(value = "代金券ID")
+    private Integer voucherId;
+
+    @ApiModelProperty(value = "代金券抵扣金额")
+    private BigDecimal voucherPrice;
+
+    @ApiModelProperty(value = "是否允许使用优惠券（满减活动配置）")
+    private Boolean allowCoupon;
+
+    @ApiModelProperty(value = "买赠赠品列表")
+    private List<GiftProductVo> giftProducts;
+
     @ApiModelProperty(value = "积分抵扣金额")
     private BigDecimal deductionPrice;
 
@@ -52,4 +74,16 @@ public class ComputedOrderPriceResponse implements Serializable {
 
     @ApiModelProperty(value = "使用的积分")
     private Integer usedIntegral;
+
+    @Data
+    public static class GiftProductVo implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private Integer productId;
+        private String productName;
+        private String productImage;
+        private Integer attrValueId;
+        private String skuName;
+        private Integer giftNum;
+    }
 }

@@ -22,8 +22,10 @@ import com.zbkj.common.request.PageParamRequest;
 import com.zbkj.common.request.SearchAndPageRequest;
 import com.zbkj.common.request.StoreCouponRequest;
 import com.zbkj.common.request.StoreCouponSearchRequest;
+import com.zbkj.common.request.StoreCouponUserRequest;
 import com.zbkj.common.response.StoreCouponFrontResponse;
 import com.zbkj.common.response.StoreCouponInfoResponse;
+import com.zbkj.common.response.StoreCouponUserResponse;
 import com.zbkj.common.utils.CrmebUtil;
 import com.zbkj.common.utils.CrmebDateUtil;
 import com.zbkj.service.dao.StoreCouponDao;
@@ -33,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -83,6 +86,8 @@ public class StoreCouponServiceImpl extends ServiceImpl<StoreCouponDao, StoreCou
         //带 StoreCoupon 类的多条件查询
         LambdaQueryWrapper<StoreCoupon> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(StoreCoupon::getIsDel, false);
+        // 默认只展示“优惠券”（兼容历史数据 couponType 为空的情况）
+        lambdaQueryWrapper.and(i -> i.eq(StoreCoupon::getCouponType, 1).or().isNull(StoreCoupon::getCouponType));
 
         if (null != request.getType()) {
             lambdaQueryWrapper.eq(StoreCoupon::getType, request.getType());
@@ -96,6 +101,28 @@ public class StoreCouponServiceImpl extends ServiceImpl<StoreCouponDao, StoreCou
             lambdaQueryWrapper.like(StoreCoupon::getName, request.getName());
         }
 
+        lambdaQueryWrapper.orderByDesc(StoreCoupon::getSort).orderByDesc(StoreCoupon::getId);
+        return dao.selectList(lambdaQueryWrapper);
+    }
+
+    /**
+     * 代金券列表（后台）
+     */
+    @Override
+    public List<StoreCoupon> getVoucherList(StoreCouponSearchRequest request, PageParamRequest pageParamRequest) {
+        PageHelper.startPage(pageParamRequest.getPage(), pageParamRequest.getLimit());
+        LambdaQueryWrapper<StoreCoupon> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(StoreCoupon::getIsDel, false);
+        lambdaQueryWrapper.eq(StoreCoupon::getCouponType, 2);
+        if (null != request.getType()) {
+            lambdaQueryWrapper.eq(StoreCoupon::getType, request.getType());
+        }
+        if (null != request.getStatus()) {
+            lambdaQueryWrapper.eq(StoreCoupon::getStatus, request.getStatus());
+        }
+        if (StrUtil.isNotBlank(request.getName())) {
+            lambdaQueryWrapper.like(StoreCoupon::getName, request.getName());
+        }
         lambdaQueryWrapper.orderByDesc(StoreCoupon::getSort).orderByDesc(StoreCoupon::getId);
         return dao.selectList(lambdaQueryWrapper);
     }
@@ -219,7 +246,73 @@ public class StoreCouponServiceImpl extends ServiceImpl<StoreCouponDao, StoreCou
             coupon.setIsForever(true);
         }
 
-        return new StoreCouponInfoResponse(coupon, productList, categoryList);
+        StoreCouponInfoResponse response = new StoreCouponInfoResponse(coupon, productList, categoryList);
+        response.setCouponType(storeCoupon.getCouponType());
+        response.setCanDeductFreight(storeCoupon.getCanDeductFreight());
+        if (storeCoupon.getCouponType() != null && storeCoupon.getCouponType() == 2) {
+            response.setCouponTypeName("代金券");
+        } else {
+            response.setCouponTypeName("优惠券");
+        }
+        return response;
+    }
+
+    /**
+     * 获取用户可用的代金券列表（用户维度的券记录列表）
+     */
+    @Override
+    public List<StoreCouponUserResponse> getUserAvailableVouchers(Integer uid, BigDecimal totalPrice) {
+        if (uid == null || uid <= 0) {
+            return new ArrayList<>();
+        }
+        Date now = CrmebDateUtil.nowDateTime();
+        LambdaQueryWrapper<StoreCouponUser> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(StoreCouponUser::getUid, uid);
+        lqw.eq(StoreCouponUser::getStatus, 0);
+        lqw.le(StoreCouponUser::getStartTime, now);
+        lqw.ge(StoreCouponUser::getEndTime, now);
+        if (totalPrice != null) {
+            lqw.le(StoreCouponUser::getMinPrice, totalPrice);
+        }
+        List<StoreCouponUser> userList = storeCouponUserService.list(lqw);
+        if (CollUtil.isEmpty(userList)) {
+            return new ArrayList<>();
+        }
+        List<Integer> couponIds = userList.stream().map(StoreCouponUser::getCouponId).distinct().collect(Collectors.toList());
+        List<StoreCoupon> couponList = getByIds(couponIds);
+        if (CollUtil.isEmpty(couponList)) {
+            return new ArrayList<>();
+        }
+        List<Integer> voucherCouponIdList = couponList.stream()
+                .filter(c -> c.getCouponType() != null && c.getCouponType() == 2)
+                .map(StoreCoupon::getId)
+                .collect(Collectors.toList());
+        if (CollUtil.isEmpty(voucherCouponIdList)) {
+            return new ArrayList<>();
+        }
+        return userList.stream()
+                .filter(u -> voucherCouponIdList.contains(u.getCouponId()))
+                .map(u -> {
+                    StoreCouponUserResponse r = new StoreCouponUserResponse();
+                    BeanUtils.copyProperties(u, r);
+                    r.setIsValid(true);
+                    r.setValidStr("usable");
+                    r.setUseStartTimeStr(CrmebDateUtil.dateToStr(u.getStartTime(), Constants.DATE_FORMAT_DATE));
+                    r.setUseEndTimeStr(CrmebDateUtil.dateToStr(u.getEndTime(), Constants.DATE_FORMAT_DATE));
+                    return r;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 批量发放代金券/优惠券给用户
+     */
+    @Override
+    public Boolean sendCouponToUsers(Integer couponId, String userIds) {
+        StoreCouponUserRequest request = new StoreCouponUserRequest();
+        request.setCouponId(couponId);
+        request.setUid(userIds);
+        return storeCouponUserService.receive(request);
     }
 
     /**
@@ -419,6 +512,8 @@ public class StoreCouponServiceImpl extends ServiceImpl<StoreCouponDao, StoreCou
         LambdaQueryWrapper<StoreCoupon> lqw = new LambdaQueryWrapper<>();
         lqw.eq(StoreCoupon::getIsDel, false);
         lqw.eq(StoreCoupon::getStatus, 1);
+        // 移动端优惠券列表不展示代金券
+        lqw.and(i -> i.eq(StoreCoupon::getCouponType, 1).or().isNull(StoreCoupon::getCouponType));
         //剩余数量大于0 或者不设置上限
         lqw.and(i -> i.gt(StoreCoupon::getLastTotal, 0).or().eq(StoreCoupon::getIsLimited, false));
         //领取时间范围, 结束时间为null则是不限时
@@ -462,4 +557,3 @@ public class StoreCouponServiceImpl extends ServiceImpl<StoreCouponDao, StoreCou
         ));
     }
 }
-

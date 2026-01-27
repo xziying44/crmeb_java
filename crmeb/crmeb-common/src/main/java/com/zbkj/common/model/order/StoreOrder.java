@@ -81,6 +81,18 @@ public class StoreOrder implements Serializable {
     @ApiModelProperty(value = "优惠券金额")
     private BigDecimal couponPrice;
 
+    @ApiModelProperty(value = "代金券ID")
+    private Integer voucherId;
+
+    @ApiModelProperty(value = "代金券抵扣金额")
+    private BigDecimal voucherPrice;
+
+    @ApiModelProperty(value = "满减活动ID")
+    private Integer fullReductionId;
+
+    @ApiModelProperty(value = "满减金额")
+    private BigDecimal fullReductionPrice;
+
     @ApiModelProperty(value = "支付状态")
     private Boolean paid;
 

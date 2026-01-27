@@ -40,6 +40,9 @@ public class StoreCouponRequest implements Serializable {
     @Length(max = 64, message = "优惠券名称长度不能超过64个字符")
     private String name;
 
+    @ApiModelProperty(value = "券类型：1-优惠券 2-代金券")
+    private Integer couponType = 1;
+
     @ApiModelProperty(value = "兑换的优惠券面值", required = true)
     @NotNull(message = "请填写优惠券兑换的优惠券面值")
     @DecimalMax(value = "99999.99", message = "优惠券面值不能大于99999.99")
@@ -62,6 +65,9 @@ public class StoreCouponRequest implements Serializable {
     @ApiModelProperty(value = "最低消费，0代表不限制", required = true)
     @DecimalMax(value = "99999.99", message = "最低消费 面值不能大于99999.99")
     private BigDecimal minPrice;
+
+    @ApiModelProperty(value = "是否可抵扣运费：0-否 1-是（仅代金券有效）")
+    private Boolean canDeductFreight = false;
 
     @ApiModelProperty(value = "是否固定领取时间， 默认0 否， 1是", required = true)
     @NotNull(message = "请选择领取是否限时")

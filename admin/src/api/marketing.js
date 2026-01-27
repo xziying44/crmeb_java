@@ -95,6 +95,47 @@ export function couponDeleteApi(params) {
 }
 
 /**
+ * 代金券 API
+ */
+export function voucherListApi(params) {
+  return request({
+    url: '/admin/marketing/voucher/list',
+    method: 'get',
+    params,
+  });
+}
+
+export function voucherInfoApi(id) {
+  return request({
+    url: `/admin/marketing/voucher/info/${id}`,
+    method: 'get',
+  });
+}
+
+export function voucherSaveApi(data) {
+  return request({
+    url: '/admin/marketing/voucher/save',
+    method: 'post',
+    data,
+  });
+}
+
+export function voucherDeleteApi(id) {
+  return request({
+    url: `/admin/marketing/voucher/delete/${id}`,
+    method: 'post',
+  });
+}
+
+export function voucherSendApi(couponId, userIds) {
+  return request({
+    url: '/admin/marketing/voucher/send',
+    method: 'post',
+    params: { couponId, userIds },
+  });
+}
+
+/**
  * 会员领取记录 列表
  * @param pram
  */

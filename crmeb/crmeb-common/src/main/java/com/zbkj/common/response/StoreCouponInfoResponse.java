@@ -41,6 +41,15 @@ public class StoreCouponInfoResponse implements Serializable {
     @ApiModelProperty(value = "优惠券发布id")
     private StoreCouponRequest coupon;
 
+    @ApiModelProperty(value = "券类型：1-优惠券 2-代金券")
+    private Integer couponType;
+
+    @ApiModelProperty(value = "券类型名称")
+    private String couponTypeName;
+
+    @ApiModelProperty(value = "是否可抵扣运费")
+    private Boolean canDeductFreight;
+
     @ApiModelProperty(value = "商品信息")
     private List<StoreProduct> product;
 
