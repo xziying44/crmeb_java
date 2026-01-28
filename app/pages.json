@@ -511,6 +511,13 @@
 							// #endif
 						}
 					}
+				},
+				{
+					"path": "voucher_buy/index",
+					"style": {
+						"navigationBarTitleText": "代金券购买",
+						"navigationStyle": "custom"
+					}
 				}
             ]
 		},

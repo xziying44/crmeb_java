@@ -167,6 +167,9 @@ public class OrderPayServiceImpl implements OrderPayService {
     @Autowired
     private SmsTemplateService smsTemplateService;
 
+    @Autowired
+    private VoucherService voucherService;
+
     /**
      * 获取支付配置
      */
@@ -190,6 +193,19 @@ public class OrderPayServiceImpl implements OrderPayService {
      */
     @Override
     public Boolean paySuccess(StoreOrder storeOrder) {
+        // 代金券购买订单特殊处理
+        if (Constants.ORDER_TYPE_VOUCHER_BUY.equals(storeOrder.getType())) {
+            try {
+                voucherService.paySuccessCallback(storeOrder.getOrderId());
+                logger.info("代金券购买订单支付成功处理完成, orderNo={}", storeOrder.getOrderId());
+            } catch (Exception e) {
+                logger.error("代金券购买订单支付成功处理异常, orderNo={}, error={}",
+                        storeOrder.getOrderId(), e.getMessage(), e);
+            }
+            // 代金券订单不需要后续商品订单处理，直接返回
+            return true;
+        }
+
         User user = userService.getById(storeOrder.getUid());
 
         List<UserBill> billList = CollUtil.newArrayList();

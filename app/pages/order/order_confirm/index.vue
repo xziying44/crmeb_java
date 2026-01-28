@@ -61,6 +61,17 @@
 						</view>
 					</view>
 
+					<!-- 代金券入口 -->
+					<view class='item acea-row row-between-wrapper' @tap='openVoucherWindow'
+						v-if="!orderInfoVo.bargainId && !orderInfoVo.combinationId && !orderInfoVo.seckillId && productType==='normal'">
+						<view>代金券</view>
+						<view class='discount'>
+							<text v-if="selectedVoucher">-¥{{ selectedVoucher.money }}</text>
+							<text v-else>请选择</text>
+							<text class='iconfont icon-jiantou'></text>
+						</view>
+					</view>
+
 					<view class='item acea-row row-between-wrapper'
 						v-if="!orderInfoVo.bargainId && !orderInfoVo.combinationId && !orderInfoVo.seckillId && productType==='normal'">
 						<view>积分抵扣</view>
@@ -135,6 +146,10 @@
 						<view>运费：</view>
 						<view class='money'>+￥{{orderInfoVo.freightFee}}</view>
 					</view>
+					<view class='item acea-row row-between-wrapper' v-if="voucherFee > 0">
+						<view>代金券抵扣：</view>
+						<view class='money'>-￥{{voucherFee}}</view>
+					</view>
 				</view>
 				<view style='height:120rpx;'></view>
 			</view>
@@ -148,6 +163,14 @@
 		<view class="alipaysubmit" v-html="formContent"></view>
 		<couponListWindow :coupon='coupon' @ChangCouponsClone="ChangCouponsClone" :openType='openType'
 			@ChangCoupons="ChangCoupons" :orderShow="orderShow"></couponListWindow>
+		<!-- 代金券选择弹窗 -->
+		<voucherListWindow
+			:visible.sync="voucherVisible"
+			:preOrderNo="preOrderNo"
+			:currentVoucherId="voucherId"
+			@change="onVoucherChange"
+			@close="voucherVisible = false"
+		></voucherListWindow>
 	</view>
 </template>
 <script>
@@ -175,6 +198,7 @@
 		CACHE_LATITUDE
 	} from '@/config/cache.js';
 	import couponListWindow from '@/components/couponListWindow';
+	import voucherListWindow from '@/components/voucherListWindow/index.vue';
 	import orderGoods from '@/components/orderGoods';
 	import navBar from '@/components/navBar';
 	import {
@@ -191,6 +215,7 @@
 		components: {
 			navBar,
 			couponListWindow,
+			voucherListWindow,
 			orderGoods,
 		},
 		onReady() {
@@ -290,7 +315,12 @@
 				theme: app.globalData.theme,
 				formContent: '',
 				addressChangeId: 0,
-				orderNo: '' //下单订单号
+				orderNo: '', //下单订单号
+				// 代金券相关
+				voucherVisible: false,
+				selectedVoucher: null,
+				voucherId: 0,
+				voucherFee: 0,
 			};
 		},
 		computed: {
@@ -558,6 +588,18 @@
 			couponTap: function() {
 				this.coupon.coupon = true;
 				if (!this.coupon.list.length) this.getCouponList();
+			},
+			// 打开代金券选择弹窗
+			openVoucherWindow: function() {
+				this.voucherVisible = true;
+			},
+			// 代金券选择变更
+			onVoucherChange: function(e) {
+				this.voucherId = e.voucherId || 0;
+				this.selectedVoucher = e.voucher || null;
+				this.voucherFee = e.voucher ? parseFloat(e.voucher.money) : 0;
+				// 重新计算订单价格（如果后端支持代金券参与计算）
+				// this.computedPrice();
 			},
 			car: function() {
 				let that = this;

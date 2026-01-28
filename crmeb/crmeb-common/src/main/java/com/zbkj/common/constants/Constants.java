@@ -591,4 +591,14 @@ public class Constants {
 
     /** 管理后台账号登录错误数量keu **/
     public static final String ADMIN_ACCOUNT_LOGIN_ERROR_NUM_KEY = "admin:account:login:error:{}";
+
+    // ========== 代金券相关常量 ==========
+    /** 订单类型：代金券购买订单 */
+    public static final Integer ORDER_TYPE_VOUCHER_BUY = 6;
+
+    /** 优惠券类型：代金券 */
+    public static final Integer COUPON_TYPE_VOUCHER = 2;
+
+    /** 优惠券类型：普通优惠券 */
+    public static final Integer COUPON_TYPE_COUPON = 1;
 }

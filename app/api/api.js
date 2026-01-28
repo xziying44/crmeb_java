@@ -65,6 +65,41 @@ export function getUserCoupons(data){
   return request.get('coupon/list',data)
 }
 
+// ========== 代金券相关 ==========
+
+/**
+ * 可购买的代金券列表
+ */
+export function getVoucherBuyList() {
+  return request.get('voucher/buyList');
+}
+
+/**
+ * 购买代金券
+ * @param {number} couponId 代金券ID
+ * @param {string} payType 支付方式: weixin/yue
+ */
+export function buyVoucher(couponId, payType) {
+  return request.post('voucher/buy', { couponId, payType });
+}
+
+/**
+ * 我的代金券列表
+ * @param {string} type 类型: usable/unusable
+ * @param {object} data 分页参数
+ */
+export function getMyVouchers(type, data) {
+  return request.get('voucher/mine', { type, ...data });
+}
+
+/**
+ * 订单可用代金券列表
+ * @param {string} preOrderNo 预下单号
+ */
+export function getOrderVouchers(preOrderNo) {
+  return request.get(`voucher/order/${preOrderNo}`);
+}
+
 /**
  * 文章分类列表
  * 

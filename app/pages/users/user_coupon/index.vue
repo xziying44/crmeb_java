@@ -6,6 +6,10 @@
 		</view>
 		<view class='coupon-list' v-if="couponsList.length">
 			<view class='item acea-row row-center-wrapper' v-for='(item,index) in couponsList' :key="index">
+				<!-- 类型角标 -->
+				<view class="type-tag" :class="item.couponType === 2 ? 'voucher' : 'coupon'">
+					{{ item.couponType === 2 ? '代金券' : '优惠券' }}
+				</view>
 				<view class='money' :class="item.validStr==='unusable'||item.validStr==='overdue'||item.validStr==='notStart' ? 'moneyGray' : 'main_bg'">
 					<view>￥<text class='num':style="[{'font-size':item.money.length>=7?'42rpx':'60rpx'}]" >{{item.money?Number(item.money):''}}</text></view>
 					<view class="pic-num">满{{ item.minPrice?Number(item.minPrice):'' }}元可用</view>
@@ -191,5 +195,29 @@
 	}
 	.main_bg{
 		@include main_bg_color(theme);
+	}
+
+	.type-tag {
+		position: absolute;
+		top: 0;
+		right: 0;
+		font-size: 20rpx;
+		padding: 4rpx 12rpx;
+		border-radius: 0 16rpx 0 16rpx;
+		z-index: 1;
+
+		&.coupon {
+			background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);
+			color: #fff;
+		}
+
+		&.voucher {
+			background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+			color: #fff;
+		}
+	}
+
+	.coupon-list .item {
+		position: relative;
 	}
 </style>

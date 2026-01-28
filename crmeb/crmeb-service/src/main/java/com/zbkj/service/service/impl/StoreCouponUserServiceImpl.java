@@ -550,6 +550,21 @@ public class StoreCouponUserServiceImpl extends ServiceImpl<StoreCouponUserDao, 
         if (CollUtil.isEmpty(couponUserList)) {
             return null;
         }
+
+        // 批量获取对应的优惠券信息，用于获取 couponType
+        List<Integer> couponIds = couponUserList.stream()
+                .map(StoreCouponUser::getCouponId)
+                .distinct()
+                .collect(Collectors.toList());
+        Map<Integer, StoreCoupon> couponMap = new HashMap<>();
+        if (CollUtil.isNotEmpty(couponIds)) {
+            List<StoreCoupon> couponList = storeCouponService.listByIds(couponIds);
+            if (CollUtil.isNotEmpty(couponList)) {
+                couponMap = couponList.stream()
+                        .collect(Collectors.toMap(StoreCoupon::getId, c -> c, (k1, k2) -> k1));
+            }
+        }
+
         Date date = CrmebDateUtil.nowDateTime();
         List<StoreCouponUserResponse> responseList = CollUtil.newArrayList();
         for (StoreCouponUser storeCouponUser : couponUserList) {
@@ -579,6 +594,18 @@ public class StoreCouponUserServiceImpl extends ServiceImpl<StoreCouponUserDao, 
             // 更改使用时间格式，去掉时分秒
             storeCouponUserResponse.setUseStartTimeStr(CrmebDateUtil.dateToStr(storeCouponUserResponse.getStartTime(), Constants.DATE_FORMAT_DATE));
             storeCouponUserResponse.setUseEndTimeStr(CrmebDateUtil.dateToStr(storeCouponUserResponse.getEndTime(), Constants.DATE_FORMAT_DATE));
+
+            // 设置券类型（优惠券/代金券）和是否可抵扣运费
+            StoreCoupon coupon = couponMap.get(storeCouponUser.getCouponId());
+            if (coupon != null) {
+                storeCouponUserResponse.setCouponType(coupon.getCouponType());
+                storeCouponUserResponse.setCanDeductFreight(coupon.getCanDeductFreight());
+            } else {
+                // 默认设置为优惠券类型
+                storeCouponUserResponse.setCouponType(Constants.COUPON_TYPE_COUPON);
+                storeCouponUserResponse.setCanDeductFreight(false);
+            }
+
             responseList.add(storeCouponUserResponse);
         }
         return CommonPage.restPage(responseList);

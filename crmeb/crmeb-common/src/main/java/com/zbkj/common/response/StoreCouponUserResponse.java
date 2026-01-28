@@ -99,4 +99,10 @@ public class StoreCouponUserResponse implements Serializable {
 
     @ApiModelProperty(value = "过期时间字符串")
     private String useEndTimeStr;
+
+    @ApiModelProperty(value = "券类型：1-优惠券 2-代金券")
+    private Integer couponType;
+
+    @ApiModelProperty(value = "是否可抵扣运费：0-否 1-是")
+    private Boolean canDeductFreight;
 }
