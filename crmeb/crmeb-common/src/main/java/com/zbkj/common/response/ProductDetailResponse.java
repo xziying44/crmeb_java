@@ -2,6 +2,7 @@ package com.zbkj.common.response;
 
 import com.zbkj.common.model.product.StoreProduct;
 import com.zbkj.common.model.product.StoreProductAttr;
+import com.zbkj.common.vo.FullReductionDisplayVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -49,4 +50,7 @@ public class ProductDetailResponse implements Serializable {
 
     @ApiModelProperty(value = "收藏标识")
     private Boolean userCollect;
+
+    @ApiModelProperty(value = "满减活动信息")
+    private FullReductionDisplayVO fullReduction;
 }

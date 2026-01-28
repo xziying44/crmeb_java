@@ -24,6 +24,8 @@ import com.zbkj.common.model.user.User;
 import com.zbkj.front.service.ProductService;
 import com.zbkj.service.delete.ProductUtils;
 import com.zbkj.service.service.*;
+import com.zbkj.service.service.promotion.FullReductionService;
+import com.zbkj.common.vo.FullReductionDisplayVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -91,6 +94,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private ActivityStyleService activityStyleService;
+
+    @Autowired
+    private FullReductionService fullReductionService;
 
     /**
      * 获取分类
@@ -200,6 +206,16 @@ public class ProductServiceImpl implements ProductService {
             storeProduct.setVipPrice(vipPrice);
         }
         productDetailResponse.setProductInfo(storeProduct);
+
+        // 查询满减活动信息
+        List<Integer> categoryIdList = storeProductService.getProductAllCategoryIdByProductIds(
+            Collections.singletonList(storeProduct.getId())
+        );
+        FullReductionDisplayVO fullReduction = fullReductionService.getDisplayInfoByProduct(
+            storeProduct.getId(),
+            categoryIdList
+        );
+        productDetailResponse.setFullReduction(fullReduction);
 
         // 获取商品规格
         List<StoreProductAttr> attrList = attrService.getListByProductIdAndType(storeProduct.getId(), Constants.PRODUCT_TYPE_NORMAL);

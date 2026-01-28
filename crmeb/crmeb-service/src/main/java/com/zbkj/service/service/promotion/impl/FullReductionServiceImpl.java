@@ -18,6 +18,7 @@ import com.zbkj.common.request.FullReductionRequest;
 import com.zbkj.common.request.FullReductionSearchRequest;
 import com.zbkj.common.response.FullReductionResponse;
 import com.zbkj.common.utils.CrmebDateUtil;
+import com.zbkj.common.vo.FullReductionDisplayVO;
 import com.zbkj.service.dao.promotion.FullReductionDao;
 import com.zbkj.service.service.promotion.FullReductionLevelService;
 import com.zbkj.service.service.promotion.FullReductionProductService;
@@ -245,6 +246,46 @@ public class FullReductionServiceImpl extends ServiceImpl<FullReductionDao, Full
             bestReduce = totalAmount;
         }
         return bestReduce;
+    }
+
+    @Override
+    public FullReductionDisplayVO getDisplayInfoByProduct(Integer productId, List<Integer> categoryIds) {
+        // 参数校验
+        if (ObjectUtil.isNull(productId)) {
+            return null;
+        }
+
+        // 1. 复用现有方法查找适用的满减活动
+        FullReduction reduction = getAvailableByProductIds(
+            Collections.singletonList(productId),
+            categoryIds
+        );
+
+        if (ObjectUtil.isNull(reduction)) {
+            return null;
+        }
+
+        // 2. 查询该活动的所有阶梯
+        List<FullReductionLevel> levels = levelService.getByReductionId(reduction.getId());
+        if (CollUtil.isEmpty(levels)) {
+            return null;
+        }
+
+        // 3. 按满足金额升序排列（方便前端展示：从低到高）
+        levels.sort(Comparator.comparing(FullReductionLevel::getFullAmount));
+
+        // 4. 组装返回对象
+        FullReductionDisplayVO vo = new FullReductionDisplayVO();
+        vo.setId(reduction.getId());
+        vo.setName(reduction.getName());
+        vo.setLevels(levels.stream().map(l -> {
+            FullReductionDisplayVO.LevelItem item = new FullReductionDisplayVO.LevelItem();
+            item.setFullAmount(l.getFullAmount());
+            item.setReduceAmount(l.getReduceAmount());
+            return item;
+        }).collect(Collectors.toList()));
+
+        return vo;
     }
 
     /**

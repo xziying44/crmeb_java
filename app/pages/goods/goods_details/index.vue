@@ -53,6 +53,8 @@
 							@videoPause="videoPause"></productConSwiper>
 						<!-- 氛围图card -->
 						<activity-style v-if="productInfo.activityStyle" :productInfo="productInfo"></activity-style>
+						<!-- 满减活动标签 -->
+						<fullReductionTags :reduction="fullReduction" />
 						<view class="pad30">
 							<view class='wrapper mb30 borRadius14'>
 								<view class='share acea-row row-between row-bottom share-icon-box'>
@@ -332,6 +334,7 @@
 
 <script>
 	import activityStyle from "./components/activityStyle.vue";
+	import fullReductionTags from '@/components/fullReductionTags/index.vue';
 	import uQRCode from '@/js_sdk/Sansnn-uQRCode/uqrcode.js'
 	import store from '@/store';
 	import {
@@ -405,6 +408,7 @@
 			cusPreviewImg,
 			"jyf-parser": parser,
 			activityStyle,
+			fullReductionTags,
 			navBar
 		},
 		data() {
@@ -427,6 +431,7 @@
 				replyCount: 0, //总评论数量
 				reply: [], //评论列表
 				productInfo: {}, //商品详情
+				fullReduction: null, //满减活动信息
 				productValue: [], //系统属性
 				couponList: [], //优惠券
 				cart_num: 1, //购买数量
@@ -981,6 +986,8 @@
 					that.$set(that.sharePacket, 'isState', (res.data.priceName != "0" && res.data.priceName !==
 						null) ? false : true);
 					that.$set(that, 'activityH5', res.data.activityAllH5 ? res.data.activityAllH5 : []);
+					// 设置满减活动信息
+					that.$set(that, 'fullReduction', res.data.fullReduction || null);
 					uni.setNavigationBarTitle({
 						title: productInfo.storeName.substring(0, 7) + "..."
 					})

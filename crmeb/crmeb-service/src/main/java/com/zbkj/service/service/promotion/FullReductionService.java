@@ -6,6 +6,7 @@ import com.zbkj.common.model.promotion.FullReduction;
 import com.zbkj.common.request.FullReductionRequest;
 import com.zbkj.common.request.FullReductionSearchRequest;
 import com.zbkj.common.response.FullReductionResponse;
+import com.zbkj.common.vo.FullReductionDisplayVO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -49,5 +50,13 @@ public interface FullReductionService extends IService<FullReduction> {
      * 计算满减金额
      */
     BigDecimal calculateReduction(FullReduction reduction, BigDecimal totalAmount);
+
+    /**
+     * 根据商品ID获取可用的满减活动展示信息
+     * @param productId 商品ID
+     * @param categoryIds 商品所属品类ID列表
+     * @return 满减活动展示信息（如无活动返回null）
+     */
+    FullReductionDisplayVO getDisplayInfoByProduct(Integer productId, List<Integer> categoryIds);
 }
 
