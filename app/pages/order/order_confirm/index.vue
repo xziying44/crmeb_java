@@ -134,6 +134,10 @@
 						<view>商品总价：</view>
 						<view class='money'>￥{{orderInfoVo.proTotalFee || 0}}</view>
 					</view>
+					<view class='item acea-row row-between-wrapper' v-if="fullReductionPrice > 0">
+						<view>满减优惠<text v-if="fullReductionName">（{{fullReductionName}}）</text>：</view>
+						<view class='money'>-￥{{fullReductionPrice}}</view>
+					</view>
 					<view class='item acea-row row-between-wrapper' v-if="orderInfoVo.couponFee > 0">
 						<view>优惠券抵扣：</view>
 						<view class='money'>-￥{{orderInfoVo.couponFee}}</view>
@@ -321,6 +325,10 @@
 				selectedVoucher: null,
 				voucherId: 0,
 				voucherFee: 0,
+				// 满减活动相关
+				fullReductionId: 0,
+				fullReductionName: '',
+				fullReductionPrice: 0,
 			};
 		},
 		computed: {
@@ -395,7 +403,6 @@
 						this.addressId = orderInfoVo.addressId;
 					} else {
 						this.addressId = this.addressChangeId;
-						if (orderInfoVo.addressId != this.addressChangeId) this.computedPrice();
 					}
 					this.cartInfo = orderInfoVo.orderDetailList;
 					this.orderProNum = orderInfoVo.orderProNum;
@@ -409,6 +416,8 @@
 					this.store_self_mention = res.data.storeSelfMention == '1' && this
 						.productType ===
 						'normal' ? true : false;
+					// 加载完成后计算价格（获取满减等促销信息）
+					this.computedPrice();
 				}).catch(err => {
 					uni.navigateTo({
 						url: '/pages/users/order_list/index'
@@ -454,6 +463,7 @@
 					addressId: this.addressId,
 					useIntegral: this.useIntegral ? true : false,
 					couponId: this.couponId,
+					voucherId: this.voucherId,
 					shippingType: parseInt(shippingType) + 1,
 					preOrderNo: this.preOrderNo
 				}).then(res => {
@@ -468,6 +478,12 @@
 					this.orderInfoVo.useIntegral = data.useIntegral;
 					this.orderInfoVo.usedIntegral = data.usedIntegral;
 					this.orderInfoVo.surplusIntegral = data.surplusIntegral;
+					// 满减活动信息
+					this.fullReductionId = data.fullReductionId || 0;
+					this.fullReductionName = data.fullReductionName || '';
+					this.fullReductionPrice = data.fullReductionPrice || 0;
+					// 代金券抵扣信息（从后端获取实际计算结果）
+					this.voucherFee = data.voucherPrice || 0;
 					//this.orderInfoVo.userIntegral = data.userIntegral;
 				}).catch(err => {
 					return this.$util.Tips({
@@ -496,15 +512,18 @@
 			},
 			/**
 			 * 处理点击优惠券后的事件
-			 * 
+			 *
 			 */
 			ChangCoupons: function(e) {
-				// this.usableCoupon = e
-				// this.coupon.coupon = false
 				let index = e,
 					list = this.coupon.list,
 					couponTitle = '请选择',
 					couponId = 0;
+				// 保存之前的状态，以便验证失败时回滚
+				let previousCouponId = this.couponId;
+				let previousCouponTitle = this.couponTitle;
+				let previousIsUse = list[index].isUse;
+
 				for (let i = 0, len = list.length; i < len; i++) {
 					if (i != index) {
 						list[i].use_title = '';
@@ -512,11 +531,11 @@
 					}
 				}
 				if (list[index].isUse) {
-					//不使用优惠券
+					// 不使用优惠券
 					list[index].use_title = '';
 					list[index].isUse = 0;
 				} else {
-					//使用优惠券
+					// 使用优惠券
 					list[index].use_title = '不使用';
 					list[index].isUse = 1;
 					couponTitle = list[index].name;
@@ -524,9 +543,45 @@
 				}
 				this.couponTitle = couponTitle;
 				this.couponId = couponId;
-				this.$set(this.coupon, 'coupon', false);
 				this.$set(this.coupon, 'list', list);
-				this.computedPrice();
+
+				// 调用价格计算验证优惠券是否可用
+				let shippingType = this.shippingType;
+				postOrderComputed({
+					addressId: this.addressId,
+					useIntegral: this.useIntegral ? true : false,
+					couponId: this.couponId,
+					shippingType: parseInt(shippingType) + 1,
+					preOrderNo: this.preOrderNo
+				}).then(res => {
+					// 优惠券验证成功，更新价格信息
+					let data = res.data;
+					this.orderInfoVo.couponFee = data.couponFee;
+					this.orderInfoVo.userIntegral = data.surplusIntegral;
+					this.orderInfoVo.deductionPrice = data.deductionPrice;
+					this.orderInfoVo.freightFee = data.freightFee;
+					this.orderInfoVo.payFee = data.payFee;
+					this.orderInfoVo.proTotalFee = data.proTotalFee;
+					this.orderInfoVo.useIntegral = data.useIntegral;
+					this.orderInfoVo.usedIntegral = data.usedIntegral;
+					this.orderInfoVo.surplusIntegral = data.surplusIntegral;
+					this.fullReductionId = data.fullReductionId || 0;
+					this.fullReductionName = data.fullReductionName || '';
+					this.fullReductionPrice = data.fullReductionPrice || 0;
+					// 关闭优惠券弹窗
+					this.$set(this.coupon, 'coupon', false);
+				}).catch(err => {
+					// 优惠券验证失败，回滚到之前的状态
+					list[index].use_title = previousIsUse ? '不使用' : '';
+					list[index].isUse = previousIsUse;
+					this.couponId = previousCouponId;
+					this.couponTitle = previousCouponTitle;
+					this.$set(this.coupon, 'list', list);
+					// 显示错误提示，不关闭弹窗
+					return this.$util.Tips({
+						title: err
+					});
+				});
 			},
 			/**
 			 * 使用积分抵扣
@@ -597,9 +652,8 @@
 			onVoucherChange: function(e) {
 				this.voucherId = e.voucherId || 0;
 				this.selectedVoucher = e.voucher || null;
-				this.voucherFee = e.voucher ? parseFloat(e.voucher.money) : 0;
-				// 重新计算订单价格（如果后端支持代金券参与计算）
-				// this.computedPrice();
+				// 重新计算订单价格，后端会计算代金券抵扣
+				this.computedPrice();
 			},
 			car: function() {
 				let that = this;

@@ -4,26 +4,28 @@
 
 
     <select id="getListByPreOrderNo" resultType="com.zbkj.common.model.coupon.StoreCouponUser" parameterType="Map">
-        SELECT *
-        FROM eb_store_coupon_user
-        where
-        `status` = 0
-        AND min_price &lt;= #{maxPrice}
-        AND start_time &lt; #{date} AND end_time &gt; #{date}
-        AND uid = #{uid}
-        AND (use_type = 1
-                 or (use_type = 2 and
+        SELECT scu.*
+        FROM eb_store_coupon_user scu
+        INNER JOIN eb_store_coupon sc ON scu.coupon_id = sc.id
+        WHERE
+        scu.`status` = 0
+        AND sc.coupon_type = 1
+        AND scu.min_price &lt;= #{maxPrice}
+        AND scu.start_time &lt; #{date} AND scu.end_time &gt; #{date}
+        AND scu.uid = #{uid}
+        AND (scu.use_type = 1
+                 or (scu.use_type = 2 and
         <foreach collection="productIds" item="proId" open="(" close=")" index="index" separator="or">
-            find_in_set(#{proId}, primary_key)
+            find_in_set(#{proId}, scu.primary_key)
         </foreach>
                  )
-                 or (use_type = 3 and
+                 or (scu.use_type = 3 and
         <foreach collection="categoryIdList" item="cateId" open="(" close=")" index="index" separator="or">
-            find_in_set(#{cateId}, primary_key)
+            find_in_set(#{cateId}, scu.primary_key)
         </foreach>
                  )
             )
-        order by id desc
+        order by scu.id desc
     </select>
 
 </mapper>
