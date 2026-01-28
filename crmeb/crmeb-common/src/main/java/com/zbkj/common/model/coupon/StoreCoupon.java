@@ -99,6 +99,12 @@ public class StoreCoupon implements Serializable {
     @ApiModelProperty(value = "是否删除 状态（0：否，1：是）")
     private Boolean isDel;
 
+    @ApiModelProperty(value = "是否可购买（0：否，1：是）")
+    private Boolean canBuy;
+
+    @ApiModelProperty(value = "售价（用户购买价格）")
+    private BigDecimal price;
+
     @ApiModelProperty(value = "创建时间")
     private Date createTime;
 

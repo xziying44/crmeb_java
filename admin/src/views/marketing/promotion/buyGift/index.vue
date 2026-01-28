@@ -124,21 +124,72 @@
           <el-input-number v-model="form.limitNum" :min="1" controls-position="right" />
         </el-form-item>
 
-        <el-form-item label="购买商品配置" required>
-          <el-input
-            v-model="form.buyProductsJson"
-            type="textarea"
-            :rows="5"
-            placeholder='请输入JSON数组，如：[{"productId":1,"attrValueId":0,"buyNum":2}]'
-          />
+        <el-form-item label="购买商品" required>
+          <el-table :data="form.buyProducts" size="mini" border style="margin-bottom: 10px;">
+            <el-table-column label="商品图" width="80">
+              <template slot-scope="{ row }">
+                <el-image :src="row.image" style="width: 50px; height: 50px; object-fit: cover;" />
+              </template>
+            </el-table-column>
+            <el-table-column prop="storeName" label="商品名称" min-width="150" show-overflow-tooltip />
+            <el-table-column label="规格" min-width="150">
+              <template slot-scope="{ row }">
+                <el-select v-model="row.attrValueId" placeholder="请选择规格" size="small" style="width: 100%;">
+                  <el-option
+                    v-for="attr in row.attrValues"
+                    :key="attr.id"
+                    :label="attr.sku || '默认'"
+                    :value="attr.id"
+                  />
+                </el-select>
+              </template>
+            </el-table-column>
+            <el-table-column label="购买数量" width="120">
+              <template slot-scope="{ row }">
+                <el-input-number v-model="row.buyNum" :min="1" size="small" controls-position="right" />
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="80">
+              <template slot-scope="{ $index }">
+                <el-button type="text" size="small" @click="removeBuyProduct($index)">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-button size="small" icon="el-icon-plus" @click="addBuyProduct">添加购买商品</el-button>
         </el-form-item>
+
         <el-form-item label="赠品配置" required>
-          <el-input
-            v-model="form.giftProductsJson"
-            type="textarea"
-            :rows="5"
-            placeholder='请输入JSON数组，如：[{"productId":2,"attrValueId":0,"giftNum":1}]'
-          />
+          <el-table :data="form.giftProducts" size="mini" border style="margin-bottom: 10px;">
+            <el-table-column label="商品图" width="80">
+              <template slot-scope="{ row }">
+                <el-image :src="row.image" style="width: 50px; height: 50px; object-fit: cover;" />
+              </template>
+            </el-table-column>
+            <el-table-column prop="storeName" label="商品名称" min-width="150" show-overflow-tooltip />
+            <el-table-column label="规格" min-width="150">
+              <template slot-scope="{ row }">
+                <el-select v-model="row.attrValueId" placeholder="请选择规格" size="small" style="width: 100%;">
+                  <el-option
+                    v-for="attr in row.attrValues"
+                    :key="attr.id"
+                    :label="attr.sku || '默认'"
+                    :value="attr.id"
+                  />
+                </el-select>
+              </template>
+            </el-table-column>
+            <el-table-column label="赠送数量" width="120">
+              <template slot-scope="{ row }">
+                <el-input-number v-model="row.giftNum" :min="1" size="small" controls-position="right" />
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="80">
+              <template slot-scope="{ $index }">
+                <el-button type="text" size="small" @click="removeGiftProduct($index)">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-button size="small" icon="el-icon-plus" @click="addGiftProduct">添加赠品</el-button>
         </el-form-item>
       </el-form>
 
@@ -159,6 +210,7 @@ import {
   buyGiftDetailApi,
   buyGiftSaveApi,
 } from '@/api/promotion';
+import { productDetailApi } from '@/api/store';
 
 export default {
   name: 'BuyGiftList',
@@ -211,8 +263,8 @@ export default {
         endTime: '',
         limitType: 0,
         limitNum: 0,
-        buyProductsJson: '[{"productId":1,"attrValueId":0,"buyNum":1}]',
-        giftProductsJson: '[{"productId":1,"attrValueId":0,"giftNum":1}]',
+        buyProducts: [],
+        giftProducts: [],
       };
     },
     seachList() {
@@ -276,8 +328,25 @@ export default {
         this.form.endTime = res.endTime;
         this.form.limitType = res.limitType;
         this.form.limitNum = res.limitNum;
-        this.form.buyProductsJson = JSON.stringify(res.buyProducts || []);
-        this.form.giftProductsJson = JSON.stringify(res.giftProducts || []);
+        // 回显商品数据
+        this.form.buyProducts = (res.buyProducts || []).map((p) => ({
+          productId: p.productId,
+          storeName: p.storeName || '',
+          image: p.image || '',
+          attrValueId: p.attrValueId,
+          attrValues: p.attrValues || [{ id: p.attrValueId, sku: '默认' }],
+          buyNum: p.buyNum,
+          giftNum: 1,
+        }));
+        this.form.giftProducts = (res.giftProducts || []).map((p) => ({
+          productId: p.productId,
+          storeName: p.storeName || '',
+          image: p.image || '',
+          attrValueId: p.attrValueId,
+          attrValues: p.attrValues || [{ id: p.attrValueId, sku: '默认' }],
+          buyNum: 1,
+          giftNum: p.giftNum,
+        }));
       });
     },
     handleDelete(row) {
@@ -289,9 +358,50 @@ export default {
         });
       });
     },
-    parseJsonArray(text) {
-      const v = JSON.parse(text || '[]');
-      return Array.isArray(v) ? v : [];
+    // 添加购买商品
+    addBuyProduct() {
+      const _this = this;
+      this.$modalGoodList(function (product) {
+        _this.fetchProductAttr(product, 'buy');
+      });
+    },
+    // 添加赠品
+    addGiftProduct() {
+      const _this = this;
+      this.$modalGoodList(function (product) {
+        _this.fetchProductAttr(product, 'gift');
+      });
+    },
+    // 获取商品规格信息
+    fetchProductAttr(product, type) {
+      productDetailApi(product.id).then((res) => {
+        const attrValues = (res.attrValue || []).map((attr) => ({
+          id: attr.id,
+          sku: attr.sku,
+        }));
+        const newProduct = {
+          productId: product.id,
+          storeName: product.storeName,
+          image: product.image,
+          attrValueId: attrValues.length ? attrValues[0].id : 0,
+          attrValues: attrValues,
+          buyNum: 1,
+          giftNum: 1,
+        };
+        if (type === 'buy') {
+          this.form.buyProducts.push(newProduct);
+        } else {
+          this.form.giftProducts.push(newProduct);
+        }
+      });
+    },
+    // 移除购买商品
+    removeBuyProduct(index) {
+      this.form.buyProducts.splice(index, 1);
+    },
+    // 移除赠品
+    removeGiftProduct(index) {
+      this.form.giftProducts.splice(index, 1);
     },
     handleSubmit() {
       this.$refs.formRef.validate((valid) => {
@@ -300,23 +410,24 @@ export default {
           this.$message.error('请选择时间范围');
           return;
         }
-        let buyProducts = [];
-        let giftProducts = [];
-        try {
-          buyProducts = this.parseJsonArray(this.form.buyProductsJson);
-          giftProducts = this.parseJsonArray(this.form.giftProductsJson);
-        } catch (e) {
-          this.$message.error('商品配置JSON格式不正确');
-          return;
-        }
-        if (!buyProducts.length) {
+        if (!this.form.buyProducts.length) {
           this.$message.error('请配置购买商品');
           return;
         }
-        if (!giftProducts.length) {
+        if (!this.form.giftProducts.length) {
           this.$message.error('请配置赠品');
           return;
         }
+        const buyProducts = this.form.buyProducts.map((p) => ({
+          productId: p.productId,
+          attrValueId: p.attrValueId,
+          buyNum: p.buyNum,
+        }));
+        const giftProducts = this.form.giftProducts.map((p) => ({
+          productId: p.productId,
+          attrValueId: p.attrValueId,
+          giftNum: p.giftNum,
+        }));
         const payload = {
           id: this.form.id,
           name: this.form.name,
@@ -344,4 +455,3 @@ export default {
   },
 };
 </script>
-

@@ -10,14 +10,29 @@
         </el-form>
       </div>
       <el-table v-loading="loading" :data="tableData.data" width="800px" size="small">
-        <el-table-column label="" width="40">
+        <!-- 多选模式 -->
+        <el-table-column key="multi" v-if="handleNum === 'many'" width="55">
+          <template slot="header">
+            <el-checkbox
+              :value="isChecked && checkedPage.indexOf(tableFrom.page) > -1"
+              @change="changeType"
+            />
+          </template>
+          <template slot-scope="scope">
+            <el-checkbox
+              :value="checkedIds.indexOf(scope.row.uid) > -1"
+              @change="(v) => changeOne(v, scope.row)"
+            />
+          </template>
+        </el-table-column>
+        <!-- 单选模式 -->
+        <el-table-column key="single" v-else label="" width="40">
           <template slot-scope="scope">
             <el-radio
               v-model="templateRadio"
               :label="scope.row.uid"
               @change.native="getTemplateRow(scope.$index, scope.row)"
-              >&nbsp;</el-radio
-            >
+            >&nbsp;</el-radio>
           </template>
         </el-table-column>
         <el-table-column prop="uid" label="ID" min-width="60" />
@@ -52,7 +67,8 @@
         />
         <div class="mt30">
           <el-button @click="closeDialog">取消</el-button>
-          <el-button type="primary" @click="closeDialog">确定</el-button>
+          <el-button v-if="handleNum === 'many'" type="primary" @click="ok">确定({{ checkedIds.length }})</el-button>
+          <el-button v-else type="primary" @click="closeDialog">确定</el-button>
         </div>
       </div>
     </el-card>
@@ -63,6 +79,12 @@
 import { userListApi } from '@/api/user';
 export default {
   name: 'UserList',
+  props: {
+    handleNum: {
+      type: String,
+      default: '',
+    },
+  },
   filters: {
     saxFilter(status) {
       const statusMap = {
@@ -93,6 +115,11 @@ export default {
         limit: 10,
         keywords: '',
       },
+      // 多选相关
+      checkedIds: [],
+      checkBox: [],
+      checkedPage: [],
+      isChecked: false,
     };
   },
   mounted() {
@@ -104,6 +131,54 @@ export default {
     },
     getTemplateRow(idx, row) {
       this.$emit('getTemplateRow', row);
+    },
+    // 全选/取消全选
+    changeType(v) {
+      this.isChecked = v;
+      const index = this.checkedPage.indexOf(this.tableFrom.page);
+      if (v) {
+        if (index === -1) this.checkedPage.push(this.tableFrom.page);
+      } else {
+        if (index > -1) this.checkedPage.splice(index, 1);
+      }
+      this.syncCheckedId(v);
+    },
+    // 单个选中/取消
+    changeOne(v, user) {
+      if (v) {
+        const index = this.checkedIds.indexOf(user.uid);
+        if (index === -1) {
+          this.checkedIds.push(user.uid);
+          this.checkBox.push(user);
+        }
+      } else {
+        const index = this.checkedIds.indexOf(user.uid);
+        if (index > -1) {
+          this.checkedIds.splice(index, 1);
+          this.checkBox.splice(index, 1);
+        }
+      }
+    },
+    // 同步当前页选中状态
+    syncCheckedId(checked) {
+      this.tableData.data.forEach((item) => {
+        const index = this.checkedIds.indexOf(item.uid);
+        if (checked) {
+          if (index === -1) {
+            this.checkedIds.push(item.uid);
+            this.checkBox.push(item);
+          }
+        } else {
+          if (index > -1) {
+            this.checkedIds.splice(index, 1);
+            this.checkBox.splice(index, 1);
+          }
+        }
+      });
+    },
+    // 多选确认
+    ok() {
+      this.$emit('getUsers', this.checkBox);
     },
     // 列表
     getList() {

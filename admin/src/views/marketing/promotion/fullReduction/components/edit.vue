@@ -40,13 +40,31 @@
         <el-switch v-model="form.allowCoupon" :active-value="true" :inactive-value="false" active-text="允许" inactive-text="不允许" />
       </el-form-item>
 
-      <el-form-item v-if="form.scopeType !== 1" label="关联ID列表" prop="relationIdsStr">
-        <el-input
-          v-model="form.relationIdsStr"
-          type="textarea"
-          :rows="3"
-          placeholder="请输入关联的ID，多个用英文逗号分隔（scopeType=2为品类ID，scopeType=3为商品ID）"
+      <el-form-item v-if="form.scopeType === 2" label="选择品类" prop="selectedCategoryIds">
+        <el-cascader
+          v-model="form.selectedCategoryIds"
+          :options="merCateList"
+          :props="props"
+          clearable
+          style="width: 100%"
+          placeholder="请选择品类"
         />
+      </el-form-item>
+
+      <el-form-item v-if="form.scopeType === 3" label="选择商品" prop="selectedProducts">
+        <div class="acea-row">
+          <template v-if="form.selectedProducts.length">
+            <div class="pictrue" v-for="(item, index) in form.selectedProducts" :key="item.id">
+              <img :src="item.image" style="width: 60px; height: 60px; object-fit: cover;" />
+              <i class="el-icon-error btndel" @click="removeProduct(index)" />
+            </div>
+          </template>
+          <div class="upLoadPicBox" @click="selectProducts">
+            <div class="upLoad">
+              <i class="el-icon-plus" style="font-size: 24px; color: #c0c4cc;" />
+            </div>
+          </div>
+        </div>
       </el-form-item>
 
       <el-form-item label="阶梯满减" required>
@@ -82,6 +100,7 @@
 
 <script>
 import { fullReductionDetailApi, fullReductionSaveApi } from '@/api/promotion';
+import { categoryApi } from '@/api/store';
 
 export default {
   name: 'FullReductionEdit',
@@ -99,17 +118,37 @@ export default {
     return {
       loading: false,
       form: this.getDefaultForm(),
+      merCateList: [],
+      props: {
+        children: 'child',
+        label: 'name',
+        value: 'id',
+        multiple: true,
+        emitPath: false,
+      },
       rules: {
         name: [{ required: true, message: '请输入活动名称', trigger: 'blur' }],
         scopeType: [{ required: true, message: '请选择活动范围', trigger: 'change' }],
-        relationIdsStr: [
+        selectedCategoryIds: [
           {
             validator: (rule, value, callback) => {
-              if (this.form.scopeType === 1) return callback();
-              if (!value) return callback(new Error('请输入关联ID列表'));
+              if (this.form.scopeType === 2 && (!value || !value.length)) {
+                return callback(new Error('请选择品类'));
+              }
               return callback();
             },
-            trigger: 'blur',
+            trigger: 'change',
+          },
+        ],
+        selectedProducts: [
+          {
+            validator: (rule, value, callback) => {
+              if (this.form.scopeType === 3 && (!value || !value.length)) {
+                return callback(new Error('请选择商品'));
+              }
+              return callback();
+            },
+            trigger: 'change',
           },
         ],
       },
@@ -122,7 +161,15 @@ export default {
       }
     },
   },
+  mounted() {
+    this.getCategoryList();
+  },
   methods: {
+    getCategoryList() {
+      categoryApi({ status: -1, type: 1 }).then((res) => {
+        this.merCateList = res || [];
+      });
+    },
     getDefaultForm() {
       return {
         id: null,
@@ -131,7 +178,8 @@ export default {
         startTime: '',
         endTime: '',
         allowCoupon: true,
-        relationIdsStr: '',
+        selectedCategoryIds: [],
+        selectedProducts: [],
         levels: [{ fullAmount: 0, reduceAmount: 0 }],
       };
     },
@@ -150,12 +198,30 @@ export default {
             fullAmount: l.fullAmount,
             reduceAmount: l.reduceAmount,
           }));
-          this.form.relationIdsStr = (res.relationIds || []).join(',');
+          // 回显品类/商品
+          if (res.scopeType === 2) {
+            this.form.selectedCategoryIds = res.relationIds || [];
+          } else if (res.scopeType === 3) {
+            this.form.selectedProducts = (res.products || []).map((p) => ({
+              id: p.id || p.productId,
+              image: p.image,
+              storeName: p.storeName,
+            }));
+          }
           if (!this.form.levels.length) {
             this.form.levels = [{ fullAmount: 0, reduceAmount: 0 }];
           }
         });
       }
+    },
+    selectProducts() {
+      const _this = this;
+      this.$modalGoodList(function (products) {
+        _this.form.selectedProducts = products;
+      }, 'many', this.form.selectedProducts);
+    },
+    removeProduct(index) {
+      this.form.selectedProducts.splice(index, 1);
     },
     addLevel() {
       this.form.levels.push({ fullAmount: 0, reduceAmount: 0 });
@@ -166,13 +232,6 @@ export default {
         this.form.levels.push({ fullAmount: 0, reduceAmount: 0 });
       }
     },
-    parseRelationIds() {
-      if (!this.form.relationIdsStr) return [];
-      return this.form.relationIdsStr
-        .split(',')
-        .map((s) => Number(String(s).trim()))
-        .filter((n) => Number.isInteger(n) && n > 0);
-    },
     handleSubmit() {
       this.$refs.formRef.validate((valid) => {
         if (!valid) return;
@@ -180,6 +239,21 @@ export default {
           this.$message.error('请选择时间范围');
           return;
         }
+
+        // 计算 relationIds
+        let relationIds = [];
+        if (this.form.scopeType === 2) {
+          relationIds = this.form.selectedCategoryIds;
+          if (!relationIds.length) {
+            return this.$message.error('请选择品类');
+          }
+        } else if (this.form.scopeType === 3) {
+          relationIds = this.form.selectedProducts.map((p) => p.id);
+          if (!relationIds.length) {
+            return this.$message.error('请选择商品');
+          }
+        }
+
         const payload = {
           id: this.form.id,
           name: this.form.name,
@@ -187,7 +261,7 @@ export default {
           startTime: this.form.startTime,
           endTime: this.form.endTime,
           allowCoupon: this.form.allowCoupon,
-          relationIds: this.form.scopeType === 1 ? [] : this.parseRelationIds(),
+          relationIds: relationIds,
           levels: this.form.levels,
         };
         this.loading = true;
@@ -206,3 +280,36 @@ export default {
 };
 </script>
 
+<style scoped>
+.pictrue {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.pictrue .btndel {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  font-size: 18px;
+  color: #f56c6c;
+  cursor: pointer;
+}
+.upLoadPicBox {
+  width: 60px;
+  height: 60px;
+  border: 1px dashed #c0c4cc;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.upLoadPicBox:hover {
+  border-color: #409eff;
+}
+</style>

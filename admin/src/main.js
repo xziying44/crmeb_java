@@ -38,6 +38,7 @@ import base from '@/components/base/index'; // 公共组件
 import attrFrom from './components/attrFrom';
 import uploadPicture from './components/uploadPicture/uploadFrom';
 import goodListFrom from './components/goodList/goodListFrom';
+import userListFrom from './components/userList/userListFrom';
 import couponFrom from './components/couponList/couponFrom';
 import articleFrom from './components/articleList/articleFrom';
 import UploadIndex from '@/components/uploadPicture/index.vue';
@@ -85,6 +86,7 @@ Vue.prototype.bus = new Vue();
 Vue.use(base);
 Vue.use(uploadPicture);
 Vue.use(goodListFrom);
+Vue.use(userListFrom);
 Vue.use(couponFrom);
 Vue.use(articleFrom);
 Vue.use(VueAwesomeSwiper);

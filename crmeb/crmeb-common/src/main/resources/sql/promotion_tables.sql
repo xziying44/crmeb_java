@@ -240,3 +240,7 @@ SELECT @voucher_menu_id, '代金券发放', '', 'admin:marketing:voucher:send', 
 FROM DUAL
 WHERE @voucher_menu_id IS NOT NULL
   AND NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:marketing:voucher:send');
+
+-- 代金券购买功能扩展
+ALTER TABLE `eb_store_coupon` ADD COLUMN `can_buy` TINYINT(1) DEFAULT 0 COMMENT '是否可购买（0：否，1：是）' AFTER `is_del`;
+ALTER TABLE `eb_store_coupon` ADD COLUMN `price` DECIMAL(10,2) DEFAULT 0.00 COMMENT '售价（用户购买价格）' AFTER `can_buy`;

@@ -105,4 +105,12 @@ public class StoreCouponRequest implements Serializable {
     @ApiModelProperty(value = "状态（0：关闭，1：开启）")
     @NotNull(message = "优惠券状态不能为空")
     private Boolean status;
+
+    @ApiModelProperty(value = "是否可购买（0：否，1：是）")
+    private Boolean canBuy = false;
+
+    @ApiModelProperty(value = "售价（用户购买价格）")
+    @DecimalMin(value = "0", message = "售价不能小于0")
+    @DecimalMax(value = "99999.99", message = "售价不能大于99999.99")
+    private BigDecimal price;
 }
