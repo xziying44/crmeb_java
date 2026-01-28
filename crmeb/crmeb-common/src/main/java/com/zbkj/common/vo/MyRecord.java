@@ -202,6 +202,11 @@ public class MyRecord implements Serializable {
      * @param valueList the value of the column
      */
     public MyRecord set(String column, List<MyRecord> valueList) {
+        // 防御性编程：处理 null 值，避免 NullPointerException
+        if (valueList == null) {
+            getColumns().put(column, null);
+            return this;
+        }
         List<HashMap<String, Object>> value = new ArrayList<>();
         valueList.forEach(o -> {
             HashMap<String, Object> va = new HashMap<>(o.getColumns());
