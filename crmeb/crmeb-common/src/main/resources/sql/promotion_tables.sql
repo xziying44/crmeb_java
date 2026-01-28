@@ -101,18 +101,142 @@ ALTER TABLE eb_store_order_info
 ADD COLUMN is_gift TINYINT(1) DEFAULT 0 COMMENT '是否赠品：0-否 1-是' AFTER price;
 
 -- =========================================================
--- 系统菜单（示例数据，需根据实际菜单ID调整）
+-- 系统菜单（建议通过“系统菜单管理”后台新增；若用SQL导入，需注意清理 Redis 缓存 menuList）
+-- 说明：
+-- 1) 本项目 eb_system_menu.component 存储的是前端路由 path（例如：/marketing/promotion/fullReduction）
+-- 2) 通过 SQL 直接插入后，后端 Redis 的 menuList 缓存不会自动失效，需要手动删除该 key 或重启服务
 -- =========================================================
 
--- 添加促销活动菜单
--- 注意：下述“营销菜单ID/优惠券菜单ID”请替换为实际的父级菜单ID
-INSERT INTO eb_system_menu (pid, name, icon, perms, component, menu_type, sort, is_show)
-VALUES
--- 促销活动一级菜单
-(营销菜单ID, '促销活动', 'el-icon-present', '', '', 'M', 10, 1),
--- 满减活动
-((SELECT id FROM (SELECT id FROM eb_system_menu WHERE name='促销活动') t), '满减活动', '', 'admin:promotion:full-reduction:list', 'marketing/promotion/fullReduction/index', 'C', 1, 1),
--- 买赠活动
-((SELECT id FROM (SELECT id FROM eb_system_menu WHERE name='促销活动') t), '买赠活动', '', 'admin:promotion:buy-gift:list', 'marketing/promotion/buyGift/index', 'C', 2, 1),
--- 代金券（放在优惠券下）
-(优惠券菜单ID, '代金券列表', '', 'admin:marketing:voucher:list', 'marketing/voucher/index', 'C', 2, 1);
+-- 取“营销”父菜单ID（找不到请手动替换 @marketing_id）
+SET @marketing_id = (
+  SELECT id FROM eb_system_menu
+  WHERE name = '营销' AND menu_type = 'M'
+  ORDER BY id DESC LIMIT 1
+);
+
+-- 促销活动一级菜单（目录）
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT @marketing_id, '促销活动', 'present', '', 'M', '/marketing/promotion', 10, 1, NOW(), NOW()
+FROM DUAL
+WHERE @marketing_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE component = '/marketing/promotion' AND menu_type = 'M');
+
+SET @promotion_id = (
+  SELECT id FROM eb_system_menu
+  WHERE component = '/marketing/promotion' AND menu_type = 'M'
+  ORDER BY id DESC LIMIT 1
+);
+
+-- 满减活动菜单
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT @promotion_id, '满减活动', '', 'admin:promotion:full-reduction:list', 'C', '/marketing/promotion/fullReduction', 1, 1, NOW(), NOW()
+FROM DUAL
+WHERE @promotion_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:promotion:full-reduction:list');
+
+SET @full_reduction_menu_id = (
+  SELECT id FROM eb_system_menu
+  WHERE perms = 'admin:promotion:full-reduction:list'
+  ORDER BY id DESC LIMIT 1
+);
+
+-- 满减活动按钮权限
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT @full_reduction_menu_id, '满减活动详情', '', 'admin:promotion:full-reduction:info', 'A', '', 1, 0, NOW(), NOW()
+FROM DUAL
+WHERE @full_reduction_menu_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:promotion:full-reduction:info');
+
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT @full_reduction_menu_id, '满减活动新增/编辑', '', 'admin:promotion:full-reduction:save', 'A', '', 2, 0, NOW(), NOW()
+FROM DUAL
+WHERE @full_reduction_menu_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:promotion:full-reduction:save');
+
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT @full_reduction_menu_id, '满减活动删除', '', 'admin:promotion:full-reduction:delete', 'A', '', 3, 0, NOW(), NOW()
+FROM DUAL
+WHERE @full_reduction_menu_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:promotion:full-reduction:delete');
+
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT @full_reduction_menu_id, '满减活动状态', '', 'admin:promotion:full-reduction:status', 'A', '', 4, 0, NOW(), NOW()
+FROM DUAL
+WHERE @full_reduction_menu_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:promotion:full-reduction:status');
+
+-- 买赠活动菜单
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT @promotion_id, '买赠活动', '', 'admin:promotion:buy-gift:list', 'C', '/marketing/promotion/buyGift', 2, 1, NOW(), NOW()
+FROM DUAL
+WHERE @promotion_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:promotion:buy-gift:list');
+
+SET @buy_gift_menu_id = (
+  SELECT id FROM eb_system_menu
+  WHERE perms = 'admin:promotion:buy-gift:list'
+  ORDER BY id DESC LIMIT 1
+);
+
+-- 买赠活动按钮权限
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT @buy_gift_menu_id, '买赠活动详情', '', 'admin:promotion:buy-gift:info', 'A', '', 1, 0, NOW(), NOW()
+FROM DUAL
+WHERE @buy_gift_menu_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:promotion:buy-gift:info');
+
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT @buy_gift_menu_id, '买赠活动新增/编辑', '', 'admin:promotion:buy-gift:save', 'A', '', 2, 0, NOW(), NOW()
+FROM DUAL
+WHERE @buy_gift_menu_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:promotion:buy-gift:save');
+
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT @buy_gift_menu_id, '买赠活动删除', '', 'admin:promotion:buy-gift:delete', 'A', '', 3, 0, NOW(), NOW()
+FROM DUAL
+WHERE @buy_gift_menu_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:promotion:buy-gift:delete');
+
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT @buy_gift_menu_id, '买赠活动状态', '', 'admin:promotion:buy-gift:status', 'A', '', 4, 0, NOW(), NOW()
+FROM DUAL
+WHERE @buy_gift_menu_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:promotion:buy-gift:status');
+
+-- 代金券菜单（作为“营销”下的独立菜单；如需放到“优惠券”下，可把 pid 改为优惠券菜单ID）
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT @marketing_id, '代金券列表', '', 'admin:marketing:voucher:list', 'C', '/marketing/voucher', 11, 1, NOW(), NOW()
+FROM DUAL
+WHERE @marketing_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:marketing:voucher:list');
+
+SET @voucher_menu_id = (
+  SELECT id FROM eb_system_menu
+  WHERE perms = 'admin:marketing:voucher:list'
+  ORDER BY id DESC LIMIT 1
+);
+
+-- 代金券按钮权限
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT @voucher_menu_id, '代金券详情', '', 'admin:marketing:voucher:info', 'A', '', 1, 0, NOW(), NOW()
+FROM DUAL
+WHERE @voucher_menu_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:marketing:voucher:info');
+
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT @voucher_menu_id, '代金券新增/编辑', '', 'admin:marketing:voucher:save', 'A', '', 2, 0, NOW(), NOW()
+FROM DUAL
+WHERE @voucher_menu_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:marketing:voucher:save');
+
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT @voucher_menu_id, '代金券删除', '', 'admin:marketing:voucher:delete', 'A', '', 3, 0, NOW(), NOW()
+FROM DUAL
+WHERE @voucher_menu_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:marketing:voucher:delete');
+
+INSERT INTO eb_system_menu (pid, name, icon, perms, menu_type, component, sort, is_show, create_time, update_time)
+SELECT @voucher_menu_id, '代金券发放', '', 'admin:marketing:voucher:send', 'A', '', 4, 0, NOW(), NOW()
+FROM DUAL
+WHERE @voucher_menu_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM eb_system_menu WHERE perms = 'admin:marketing:voucher:send');

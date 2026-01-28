@@ -1106,7 +1106,12 @@ public class OrderServiceImpl implements OrderService {
             storeOrder.setStoreId(request.getStoreId());
         }
         storeOrder.setTotalNum(orderInfoVo.getOrderProNum());
-        storeOrder.setCouponId(Optional.ofNullable(request.getCouponId()).orElse(0));
+        Integer couponIdForOrder = Optional.ofNullable(request.getCouponId()).orElse(0);
+        // 满减活动配置不允许叠加优惠券时，强制不使用优惠券（避免错误占用/核销用户优惠券）
+        if (Boolean.FALSE.equals(computedOrderPriceResponse.getAllowCoupon())) {
+            couponIdForOrder = 0;
+        }
+        storeOrder.setCouponId(couponIdForOrder);
 
         // 订单总价
         BigDecimal totalPrice = computedOrderPriceResponse.getProTotalFee().add(computedOrderPriceResponse.getFreightFee());
@@ -2341,6 +2346,10 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal voucherFee = BigDecimal.ZERO;
         Integer voucherId = request.getVoucherId();
         if (ObjectUtil.isNotNull(voucherId) && voucherId > 0 && !isMarketingProduct && !orderInfoVo.getIsVideo()) {
+            StoreCouponUser voucherCouponUser = storeCouponUserService.getById(voucherId);
+            if (ObjectUtil.isNull(voucherCouponUser) || !voucherCouponUser.getUid().equals(user.getUid())) {
+                throw new CrmebException("代金券领取记录不存在！");
+            }
             voucherFee = promotionCalculateService.calculateVoucherDeduction(voucherId, payableAfterCoupon, freightFee);
         }
         if (voucherFee.compareTo(BigDecimal.ZERO) < 0) {
