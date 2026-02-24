@@ -210,6 +210,27 @@ export function savehomeStyleApi(data) {
 }
 
 /**
+ * @description 一号通 开关状态查询
+ */
+export function onePassStatusApi() {
+  return request({
+    url: '/admin/pass/status',
+    method: 'get',
+  });
+}
+
+/**
+ * @description 一号通 开关状态保存
+ */
+export function onePassStatusSaveApi(data) {
+  return request({
+    url: '/admin/system/config/saveuniq',
+    method: 'POST',
+    params: { key: 'one_pass_status', value: data },
+  });
+}
+
+/**
  * @description 一号通 应用保存
  */
 export function passAppSaveApi(data) {

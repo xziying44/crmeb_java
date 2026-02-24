@@ -1019,7 +1019,9 @@ public class StoreProductServiceImpl extends ServiceImpl<StoreProductDao, StoreP
         int copyNum = 0;
         if (copyType.equals("1")) {// 一号通
             JSONObject info = onePassService.info();
-            copyNum = Optional.ofNullable(info.getJSONObject("copy").getInteger("num")).orElse(0);
+            if (info != null) {
+                copyNum = Optional.ofNullable(info.getJSONObject("copy").getInteger("num")).orElse(0);
+            }
         }
         MyRecord record = new MyRecord();
         record.set("copyType", copyType);
@@ -1035,6 +1037,9 @@ public class StoreProductServiceImpl extends ServiceImpl<StoreProductDao, StoreP
     @Override
     public MyRecord copyProduct(String url) {
         JSONObject jsonObject = onePassService.copyGoods(url);
+        if (jsonObject == null) {
+            throw new CrmebException("一号通功能未启用，无法复制商品");
+        }
         StoreProductRequest storeProductRequest = ProductUtils.onePassCopyTransition(jsonObject);
         MyRecord record = new MyRecord();
         return record.set("info", storeProductRequest);

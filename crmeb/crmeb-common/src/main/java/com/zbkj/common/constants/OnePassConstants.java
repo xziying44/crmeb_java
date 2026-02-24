@@ -126,6 +126,9 @@ public class OnePassConstants {
     // 物流公司缓存key
     public static final String ONE_PASS_EXPRESS_CACHE_KEY = "sync_express";
 
+    // 一号通功能开关（"0"=关闭，"1"=开启，默认关闭）
+    public static final String ONE_PASS_STATUS = "one_pass_status";
+
     // 一号通当前应用access
     public static final String ONE_PASS_ACCESS_KEY = "access_key";
     // 一号通通当前应用secret

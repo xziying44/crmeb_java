@@ -92,6 +92,7 @@
 
 <script>
 import { smsNumberApi, smsPriceApi, payCodeApi, smsInfoApi } from '@/api/sms';
+import { onePassStatusApi } from '@/api/systemConfig';
 import { isLogin } from '@/libs/public';
 import { mapGetters } from 'vuex';
 import QRcode from 'qrcodejs2';
@@ -155,24 +156,34 @@ export default {
     },
     // 剩余条数
     getNumber() {
-      smsInfoApi().then(async (res) => {
-        let data = res;
-        this.account = data.account;
-        switch (this.tableFrom.type) {
-          case 'sms':
-            this.numbers = data.sms.num;
-            break;
-          case 'copy':
-            this.numbers = data.copy.num;
-            break;
-          case 'expr_dump':
-            this.numbers = data.dump.num;
-            break;
-          default:
-            this.numbers = data.query.num;
-            break;
-        }
-      });
+      onePassStatusApi()
+        .then((statusRes) => {
+          if (statusRes.data !== true) {
+            this.$message.warning('一号通功能未启用，请在设置中开启');
+            return;
+          }
+          smsInfoApi().then(async (res) => {
+            let data = res;
+            this.account = data.account;
+            switch (this.tableFrom.type) {
+              case 'sms':
+                this.numbers = data.sms.num;
+                break;
+              case 'copy':
+                this.numbers = data.copy.num;
+                break;
+              case 'expr_dump':
+                this.numbers = data.dump.num;
+                break;
+              default:
+                this.numbers = data.query.num;
+                break;
+            }
+          });
+        })
+        .catch(() => {
+          this.$message.warning('一号通功能未启用，请在设置中开启');
+        });
     },
     // 支付套餐
     getPrice() {

@@ -1577,6 +1577,9 @@ public class StoreOrderServiceImpl extends ServiceImpl<StoreOrderDao, StoreOrder
             shipment.setCargo(listByOrderNo.get(0).getProductName().substring(0,10));
         }
         JSONObject jsonObject = onePassService.shipmentCreateOrder(shipment);
+        if (jsonObject == null) {
+            throw new CrmebException("一号通功能未启用，无法使用商家寄件");
+        }
         // 任务订单号（需要在系统回调中使用
         String orderId = jsonObject.getString("order_id");
         // 任务ID（需要在系统回调中使用）
@@ -1841,6 +1844,9 @@ public class StoreOrderServiceImpl extends ServiceImpl<StoreOrderDao, StoreOrder
         }
 
         MyRecord myRecord = onePassService.expressDump(record);
+        if (myRecord == null) {
+            throw new CrmebException("一号通功能未启用，无法使用电子面单");
+        }
         logger.info("电子面单的返回数据:{}", JSONObject.toJSONString(myRecord));
         storeOrder.setDeliveryId(myRecord.getStr("kuaidinum"));
         return myRecord.getStr("label");

@@ -52,6 +52,12 @@ public class OnePassController {
         return CommonResult.success(onePassService.getOnePassApplicationInfo());
     }
 
+    @ApiOperation(value = "一号通 开关状态查询")
+    @RequestMapping(value = "/status", method = RequestMethod.GET)
+    public CommonResult<Boolean> getOnePassStatus() {
+        return CommonResult.success(onePassService.isEnabled());
+    }
+
     @PreAuthorize("hasAuthority('admin:pass:shipment:cancel')")
     @ApiOperation(value = "一号通 取消商家寄件")
     @RequestMapping(value = "/shipment/cancel", method = RequestMethod.POST)

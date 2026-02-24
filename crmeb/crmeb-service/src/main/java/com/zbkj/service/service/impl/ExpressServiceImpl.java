@@ -148,6 +148,9 @@ public class ExpressServiceImpl extends ServiceImpl<ExpressDao, Express> impleme
      */
     @Override
     public JSONObject template(String com) {
+        if (!onePassUtil.isEnabled()) {
+            return null;
+        }
         String token = onePassUtil.getToken();
         HashMap<String, String> header = onePassUtil.getCommonHeader(token);
         return onePassUtil.getData(OnePassConstants.ONE_PASS_API_URL + OnePassConstants.ONE_PASS_API_EXPRESS_TEMP_URI
@@ -156,6 +159,9 @@ public class ExpressServiceImpl extends ServiceImpl<ExpressDao, Express> impleme
 
     @Override
     public JSONObject templateFor(String com, String type, String is_shipment, String page, String limit) {
+        if (!onePassUtil.isEnabled()) {
+            return null;
+        }
         String token = onePassUtil.getToken();
         HashMap<String, String> header = onePassUtil.getCommonHeader(token);
         return onePassUtil.getData(OnePassConstants.ONE_PASS_API_URL + OnePassConstants.ONE_PASS_API_EXPRESS_DUMP_RECORD_URI +"?com="+com+"&type="+type+"&is_shipment="+is_shipment+"&page="+page+"&limit="+limit, header);
@@ -202,6 +208,9 @@ public class ExpressServiceImpl extends ServiceImpl<ExpressDao, Express> impleme
      * 并存入数据库
      */
     private void getExpressList() {
+        if (!onePassUtil.isEnabled()) {
+            return;
+        }
         String token = onePassUtil.getToken();
         HashMap<String, String> header = onePassUtil.getCommonHeader(token);
         MultiValueMap<String, Object> param = new LinkedMultiValueMap<>();

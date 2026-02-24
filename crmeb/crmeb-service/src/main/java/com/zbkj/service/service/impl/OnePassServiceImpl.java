@@ -103,6 +103,9 @@ public class OnePassServiceImpl implements OnePassService {
      */
     @Override
     public JSONObject shipmentCreateOrder(OnePassShipmentCreateOrderRequest request) {
+        if (!onePassUtil.isEnabled()) {
+            return null;
+        }
         OnePassLoginVo loginVo = onePassUtil.getLoginVo();
         String accessToken = onePassUtil.getToken(loginVo);
         HashMap<String, String> header = onePassUtil.getCommonHeader(accessToken);
@@ -148,6 +151,9 @@ public class OnePassServiceImpl implements OnePassService {
      */
     @Override
     public JSONObject shipmentCancelOrder(OnePassShipmentCancelOrderRequest request) {
+        if (!onePassUtil.isEnabled()) {
+            return null;
+        }
         OnePassLoginVo loginVo = onePassUtil.getLoginVo();
         String accessToken = onePassUtil.getToken(loginVo);
         HashMap<String, String> header = onePassUtil.getCommonHeader(accessToken);
@@ -168,6 +174,9 @@ public class OnePassServiceImpl implements OnePassService {
      */
     @Override
     public JSONObject shipmentComs() {
+        if (!onePassUtil.isEnabled()) {
+            return null;
+        }
         OnePassLoginVo loginVo = onePassUtil.getLoginVo();
         String accessToken = onePassUtil.getToken(loginVo);
         HashMap<String, String> header = onePassUtil.getCommonHeader(accessToken);
@@ -236,6 +245,9 @@ public class OnePassServiceImpl implements OnePassService {
      */
     @Override
     public JSONObject info() {
+        if (!onePassUtil.isEnabled()) {
+            return null;
+        }
         JSONObject info = getInfo();
         // 判断是否开通电子面单
         JSONObject dump = info.getJSONObject("dump");
@@ -268,6 +280,9 @@ public class OnePassServiceImpl implements OnePassService {
      */
     @Override
     public Boolean serviceOpen(ServiceOpenRequest request) {
+        if (!onePassUtil.isEnabled()) {
+            throw new CrmebException("一号通功能未启用，请先在设置中开启");
+        }
         if (!validateMealType(request.getType())) throw new CrmebException("请选择正确的服务类型");
         Boolean open = false;
         switch (request.getType()) {
@@ -292,6 +307,9 @@ public class OnePassServiceImpl implements OnePassService {
 
     @Override
     public JSONObject copyGoods(String url) {
+        if (!onePassUtil.isEnabled()) {
+            return null;
+        }
         HashMap<String, String> header = onePassUtil.getCommonHeader(onePassUtil.getToken());
         MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
         params.add("url", url);
@@ -307,6 +325,9 @@ public class OnePassServiceImpl implements OnePassService {
      */
     @Override
     public MyRecord expressDump(MyRecord record) {
+        if (!onePassUtil.isEnabled()) {
+            return null;
+        }
         HashMap<String, String> header = onePassUtil.getCommonHeader(onePassUtil.getToken());
         MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
         Map<String, Object> columns = record.getColumns();
@@ -325,6 +346,9 @@ public class OnePassServiceImpl implements OnePassService {
      */
     @Override
     public OnePassLogisticsQueryVo exprQuery(String expressNo, String com) {
+        if (!onePassUtil.isEnabled()) {
+            return null;
+        }
         HashMap<String, String> header = onePassUtil.getCommonHeader(onePassUtil.getToken());
         MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
         params.add("com", com);
@@ -353,6 +377,14 @@ public class OnePassServiceImpl implements OnePassService {
             return Boolean.FALSE;
         }
         return Boolean.TRUE;
+    }
+
+    /**
+     * 检查一号通功能是否启用
+     */
+    @Override
+    public Boolean isEnabled() {
+        return onePassUtil.isEnabled();
     }
 
 

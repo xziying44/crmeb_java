@@ -103,4 +103,11 @@ public interface OnePassService {
      * 校验一号通账号是否配置
      */
     Boolean checkAccount();
+
+    /**
+     * 检查一号通功能是否启用
+     *
+     * @return true=启用，false=关闭
+     */
+    Boolean isEnabled();
 }

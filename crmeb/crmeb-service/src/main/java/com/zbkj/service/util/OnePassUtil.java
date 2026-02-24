@@ -47,6 +47,16 @@ public class OnePassUtil {
     private RedisUtil redisUtil;
 
     /**
+     * 检查一号通功能是否启用
+     *
+     * @return true=启用，false=关闭
+     */
+    public boolean isEnabled() {
+        String status = systemConfigService.getValueByKey(OnePassConstants.ONE_PASS_STATUS);
+        return "1".equals(status);
+    }
+
+    /**
      * 获取一号通登录对象
      *
      * @return

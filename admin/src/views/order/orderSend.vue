@@ -35,7 +35,7 @@
             v-model="formItem.expressRecordType"
             @change="changeRadio(formItem.expressRecordType)"
           >
-            <el-radio label="3">商家寄件</el-radio>
+            <el-radio label="3" :disabled="!onePassEnabled">商家寄件{{ !onePassEnabled ? '（未启用一号通）' : '' }}</el-radio>
             <el-radio label="1">手动填写</el-radio>
             <el-radio label="2" v-if="checkPermi(['admin:order:sheet:info'])">电子面单打印</el-radio>
           </el-radio-group>
@@ -207,6 +207,7 @@
 <script>
 import { orderSendApi, sheetInfoApi, updateTrackingNumberApi } from '@/api/order';
 import { expressAllApi, exportTempApi, shipmentExpressApi } from '@/api/sms';
+import { onePassStatusApi } from '@/api/systemConfig';
 import { checkPermi } from '@/utils/permission'; // 权限判断函数
 import { Debounce } from '@/utils/validate';
 const validatePhone = (rule, value, callback) => {
@@ -297,6 +298,7 @@ export default {
       expressTempIdImg: '', // 商家发货电子面单图片
       pickupTime: ['', ''], // 取件时间
       nowCompany: '',
+      onePassEnabled: false, // 一号通是否启用
     };
   },
   watch: {
@@ -317,10 +319,23 @@ export default {
   },
   mounted() {
     this.express = this.expressListNormal;
-    if (checkPermi(['admin:pass:shipment:express'])) this.getShipmentExpress();
+    if (checkPermi(['admin:pass:shipment:express'])) this.checkOnePassAndLoadExpress();
   },
   methods: {
     checkPermi,
+    // 检查一号通状态后加载商家寄件快递列表
+    checkOnePassAndLoadExpress() {
+      onePassStatusApi()
+        .then((res) => {
+          this.onePassEnabled = res.data === true;
+          if (this.onePassEnabled) {
+            this.getShipmentExpress();
+          }
+        })
+        .catch(() => {
+          this.onePassEnabled = false;
+        });
+    },
     //一号通 商家寄件 快递列表
     getShipmentExpress() {
       shipmentExpressApi().then((res) => {

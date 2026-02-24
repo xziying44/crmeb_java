@@ -137,6 +137,10 @@ public class SmsServiceImpl implements SmsService {
     private Boolean sendCode(SendSmsVo sendSmsVo) {
         String result;
         try {
+            if (!onePassUtil.isEnabled()) {
+                logger.warn("一号通未启用，跳过短信发送");
+                return false;
+            }
             String token = onePassUtil.getToken();
             HashMap<String, String> header = onePassUtil.getCommonHeader(token);
 
@@ -168,6 +172,9 @@ public class SmsServiceImpl implements SmsService {
         if (StrUtil.isBlank(phone) || msgTempId <= 0) {
             return false;
         }
+        if (!onePassUtil.isEnabled()) {
+            return false;
+        }
         OnePassLoginVo loginVo = onePassUtil.getLoginVo();
         SendSmsVo smsVo = new SendSmsVo();
         smsVo.setUid(loginVo.getAccessKey());
@@ -190,6 +197,9 @@ public class SmsServiceImpl implements SmsService {
         if (StrUtil.isBlank(phone) || StrUtil.isBlank(tempKey) || msgTempId <= 0) {
             return false;
         }
+        if (!onePassUtil.isEnabled()) {
+            return false;
+        }
         OnePassLoginVo loginVo = onePassUtil.getLoginVo();
         SendSmsVo smsVo = new SendSmsVo();
         smsVo.setUid(loginVo.getAccessKey());
@@ -205,6 +215,9 @@ public class SmsServiceImpl implements SmsService {
      */
     @Override
     public Boolean modifySign(SmsModifySignRequest request) {
+        if (!onePassUtil.isEnabled()) {
+            throw new CrmebException("一号通功能未启用，无法修改签名");
+        }
         ValidateFormUtil.isPhoneException(request.getPhone());
         String token = onePassUtil.getToken();
         HashMap<String, String> header = onePassUtil.getCommonHeader(token);
@@ -223,6 +236,9 @@ public class SmsServiceImpl implements SmsService {
      */
     @Override
     public MyRecord temps(PageParamRequest pageParamRequest) {
+        if (!onePassUtil.isEnabled()) {
+            return new MyRecord().set("count", 0);
+        }
         String token = onePassUtil.getToken();
         HashMap<String, String> header = onePassUtil.getCommonHeader(token);
         MultiValueMap<String, Object> param = new LinkedMultiValueMap<>();
@@ -264,6 +280,9 @@ public class SmsServiceImpl implements SmsService {
      */
     @Override
     public Boolean applyTempMessage(SmsApplyTempRequest request) {
+        if (!onePassUtil.isEnabled()) {
+            throw new CrmebException("一号通功能未启用，无法申请模板");
+        }
         String token = onePassUtil.getToken();
         HashMap<String, String> header = onePassUtil.getCommonHeader(token);
         MultiValueMap<String, Object> param = new LinkedMultiValueMap<>();
@@ -282,6 +301,9 @@ public class SmsServiceImpl implements SmsService {
      */
     @Override
     public MyRecord applys(Integer type, PageParamRequest pageParamRequest) {
+        if (!onePassUtil.isEnabled()) {
+            return new MyRecord().set("count", 0);
+        }
         String token = onePassUtil.getToken();
         HashMap<String, String> header = onePassUtil.getCommonHeader(token);
         MultiValueMap<String, Object> param = new LinkedMultiValueMap<>();
@@ -332,6 +354,9 @@ public class SmsServiceImpl implements SmsService {
     @Override
     public Boolean sendCommonCode(String phone) {
         ValidateFormUtil.isPhone(phone,"手机号码错误");
+        if (!onePassUtil.isEnabled()) {
+            throw new CrmebException("一号通功能未启用，无法发送短信");
+        }
         Boolean checkAccount = onePassService.checkAccount();
         if (!checkAccount) {
             throw new CrmebException("发送短信请先登录一号通账号");
@@ -577,6 +602,10 @@ public class SmsServiceImpl implements SmsService {
      */
     private Boolean commonSendSms(SendSmsVo sendSmsVo) {
         try {
+            if (!onePassUtil.isEnabled()) {
+                logger.warn("一号通未启用，跳过短信发送");
+                return false;
+            }
             String result;
             String token = onePassUtil.getToken();
             HashMap<String, String> header = onePassUtil.getCommonHeader(token);
