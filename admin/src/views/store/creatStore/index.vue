@@ -1023,6 +1023,7 @@ export default {
         } else {
           const dataArr = [];
           arr.forEach((v, k) => {
+            if (!v['attrValue'] || !Array.isArray(v['attrValue'])) return;
             v['attrValue'].forEach((vv, kk) => {
               dataArr[kk] = v['attrName'] + '_' + vv;
               res[kk] = {
