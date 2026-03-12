@@ -232,6 +232,7 @@ const marketingRouter = {
       path: 'border',
       name: 'border',
       meta: { title: '活动边框', icon: '' },
+      hidden: true,
       component: () => import('@/views/marketing/border/index'),
       children: [
         {
@@ -252,6 +253,23 @@ const marketingRouter = {
             activeMenu: `/marketing/border/list`,
           },
           component: () => import('@/views/marketing/atmosphere/atmosphereList/addAtmosphere'),
+        },
+      ],
+    },
+    {
+      path: 'banner',
+      name: 'activityBanner',
+      meta: { title: '活动横幅', icon: '' },
+      component: () => import('@/views/marketing/banner/index'),
+      children: [
+        {
+          path: 'list',
+          name: 'activityBannerList',
+          meta: {
+            title: '活动横幅列表',
+            noCache: true,
+          },
+          component: () => import('@/views/marketing/banner/bannerList/index'),
         },
       ],
     },
