@@ -90,8 +90,15 @@ export default {
 <style scoped>
 .activity-banner-wrap {
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .banner-card {
   width: 100%;
+}
+.banner-image {
+  width: 100%;
+  display: block;
 }
 </style>
