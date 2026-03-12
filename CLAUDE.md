@@ -131,8 +131,3 @@ docker-compose exec redis redis-cli -a 111111
 ## API 文档
 
 启动后访问 `http://localhost:8080/doc.html` (Swagger)
-
-## 提交与 PR 规范
-
-- 绝对禁止提交代码和危险的git操作，但是代码完成后需要输出Commit提交内容用于用户手动提交。
-- Commit 信息保持简短、动词开头；历史风格偏中文摘要（如“添加…/优化…”）。

@@ -8,7 +8,8 @@
 // | Author: CRMEB Team <admin@crmeb.com>
 // +----------------------------------------------------------------------
 //移动端商城API
-let domain = 'https://jqyiu.cn'
+// let domain = 'https://jqyiu.cn'
+let domain = 'http://localhost:20510'
 // let domain = 'https://apif.java.crmeb.net'
 
 module.exports = {
