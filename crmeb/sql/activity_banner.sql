@@ -23,3 +23,6 @@ INSERT INTO `eb_system_menu` (`pid`, `name`, `icon`, `perms`, `component`, `menu
 (@banner_menu_id, '修改', '', 'admin:activity:banner:update', '', 'A', 0, 1),
 (@banner_menu_id, '删除', '', 'admin:activity:banner:delete', '', 'A', 0, 1),
 (@banner_menu_id, '更新状态', '', 'admin:activity:banner:status', '', 'A', 0, 1);
+
+-- 隐藏活动边框菜单（按名称匹配，兼容不同环境的 id）
+UPDATE `eb_system_menu` SET `is_show` = 0 WHERE `name` = '活动边框' AND `pid` = 7;
