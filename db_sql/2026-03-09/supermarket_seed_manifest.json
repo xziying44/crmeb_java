@@ -1,0 +1,195 @@
+{
+  "seed_tag": "supermarket_demo_20260309",
+  "material_root": "/Users/xziying/Downloads/超市海报商品图片水果蔬菜图生鲜饮料海鲜零食便利店外卖素材大全",
+  "categories": [
+    {
+      "name": "新鲜水果",
+      "sort": 1300,
+      "image": { "source_dir": "CS-004水果高清白底图超市生鲜大全果蔬1612张", "match": "红苹果" },
+      "children": [
+        { "name": "苹果梨类", "sort": 1301, "image": { "source_dir": "CS-004水果高清白底图超市生鲜大全果蔬1612张", "match": "红苹果" } },
+        { "name": "柑橘橙柚", "sort": 1302, "image": { "source_dir": "CS-004水果高清白底图超市生鲜大全果蔬1612张", "match": "橙子" } },
+        { "name": "浆果葡萄", "sort": 1303, "image": { "source_dir": "CS-004水果高清白底图超市生鲜大全果蔬1612张", "match": "草莓" } }
+      ],
+      "products": [
+        { "store_name": "红富士苹果", "child_name": "苹果梨类", "store_info": "脆甜清香，门店常备水果。", "keyword": "苹果,水果,生鲜", "unit_name": "斤", "price": "6.80", "cost": "4.20", "ot_price": "7.90", "stock": 120, "image": { "source_dir": "CS-004水果高清白底图超市生鲜大全果蔬1612张", "match": "红苹果" } },
+        { "store_name": "赣南脐橙", "child_name": "柑橘橙柚", "store_info": "果肉细嫩，汁水充足。", "keyword": "橙子,水果,脐橙", "unit_name": "斤", "price": "7.90", "cost": "5.00", "ot_price": "9.20", "stock": 88, "image": { "source_dir": "CS-004水果高清白底图超市生鲜大全果蔬1612张", "match": "A-橙子" } },
+        { "store_name": "奶油草莓", "child_name": "浆果葡萄", "store_info": "果香浓郁，适合日常鲜食。", "keyword": "草莓,水果,浆果", "unit_name": "盒", "price": "15.90", "cost": "11.80", "ot_price": "18.90", "stock": 56, "image": { "source_dir": "CS-004水果高清白底图超市生鲜大全果蔬1612张", "match": "奶油草莓" } }
+      ]
+    },
+    {
+      "name": "时令蔬菜",
+      "sort": 1290,
+      "image": { "source_dir": "CS-014蔬菜白底合计1980张", "match": "西兰花" },
+      "children": [
+        { "name": "叶菜类", "sort": 1291, "image": { "source_dir": "CS-014蔬菜白底合计1980张", "match": "上海青" } },
+        { "name": "根茎类", "sort": 1292, "image": { "source_dir": "CS-014蔬菜白底合计1980张", "match": "土豆" } },
+        { "name": "花果类", "sort": 1293, "image": { "source_dir": "CS-014蔬菜白底合计1980张", "match": "西兰花" } }
+      ],
+      "products": [
+        { "store_name": "西兰花", "child_name": "花果类", "store_info": "清脆鲜嫩，适合清炒凉拌。", "keyword": "西兰花,蔬菜,生鲜", "unit_name": "颗", "price": "4.90", "cost": "3.10", "ot_price": "5.90", "stock": 90, "image": { "source_dir": "CS-014蔬菜白底合计1980张", "match": "西兰花" } },
+        { "store_name": "精品黄瓜", "child_name": "花果类", "store_info": "口感清爽，可凉拌可快炒。", "keyword": "黄瓜,蔬菜,时令", "unit_name": "斤", "price": "3.80", "cost": "2.20", "ot_price": "4.60", "stock": 110, "image": { "source_dir": "CS-014蔬菜白底合计1980张", "match": "黄瓜" } },
+        { "store_name": "黄心土豆", "child_name": "根茎类", "store_info": "家常备货常用品，适合炖煮煎炒。", "keyword": "土豆,蔬菜,根茎", "unit_name": "斤", "price": "2.99", "cost": "1.80", "ot_price": "3.60", "stock": 150, "image": { "source_dir": "CS-014蔬菜白底合计1980张", "match": "土豆" } }
+      ]
+    },
+    {
+      "name": "肉禽蛋品",
+      "sort": 1280,
+      "image": { "source_dir": "CS-005超市肉品795张", "match": "鲜牛肉" },
+      "children": [
+        { "name": "牛羊肉", "sort": 1281, "image": { "source_dir": "CS-005超市肉品795张", "match": "鲜牛肉" } },
+        { "name": "猪肉类", "sort": 1282, "image": { "source_dir": "CS-005超市肉品795张", "match": "猪肋排" } }
+      ],
+      "products": [
+        { "store_name": "鲜切牛肉", "child_name": "牛羊肉", "store_info": "纹理清晰，适合火锅爆炒。", "keyword": "牛肉,鲜肉,冷鲜", "unit_name": "盒", "price": "39.90", "cost": "31.00", "ot_price": "45.90", "stock": 32, "image": { "source_dir": "CS-005超市肉品795张", "match": "鲜牛肉" } },
+        { "store_name": "猪肋排", "child_name": "猪肉类", "store_info": "肉香浓郁，适合煲汤红烧。", "keyword": "猪排,肋排,鲜肉", "unit_name": "盒", "price": "29.90", "cost": "22.50", "ot_price": "34.90", "stock": 36, "image": { "source_dir": "CS-005超市肉品795张", "match": "猪肋排" } }
+      ]
+    },
+    {
+      "name": "海鲜水产",
+      "sort": 1270,
+      "image": { "source_dir": "CS-006 超市海鲜白底图532张", "relative_path": "虾类（49张）/(1).jpg" },
+      "children": [
+        { "name": "虾蟹贝类", "sort": 1271, "image": { "source_dir": "CS-006 超市海鲜白底图532张", "relative_path": "虾类（49张）/(1).jpg" } },
+        { "name": "鱼类海产", "sort": 1272, "image": { "source_dir": "CS-006 超市海鲜白底图532张", "match": "三文鱼" } }
+      ],
+      "products": [
+        { "store_name": "鲜活大虾", "child_name": "虾蟹贝类", "store_info": "虾肉紧实，适合白灼油焖。", "keyword": "大虾,海鲜,水产", "unit_name": "盒", "price": "36.80", "cost": "28.50", "ot_price": "42.80", "stock": 28, "image": { "source_dir": "CS-006 超市海鲜白底图532张", "relative_path": "虾类（49张）/(5).jpg" } },
+        { "store_name": "冷冻三文鱼", "child_name": "鱼类海产", "store_info": "适合香煎和轻食搭配。", "keyword": "三文鱼,海鲜,鱼类", "unit_name": "盒", "price": "45.90", "cost": "36.00", "ot_price": "52.90", "stock": 20, "image": { "source_dir": "CS-006 超市海鲜白底图532张", "match": "三文鱼" } }
+      ]
+    },
+    {
+      "name": "休闲零食",
+      "sort": 1260,
+      "image": { "source_dir": "CS-007 坚果零食白底图285张", "match": "腰果" },
+      "children": [
+        { "name": "坚果炒货", "sort": 1261, "image": { "source_dir": "CS-007 坚果零食白底图285张", "match": "腰果" } },
+        { "name": "糖果巧克", "sort": 1262, "image": { "source_dir": "CS-009超市糖果图片220张", "match": "阿尔卑斯" } },
+        { "name": "膨化零食", "sort": 1263, "image": { "source_dir": "CS-010膨化食品图片219张", "match": "乐事大波浪薯片" } },
+        { "name": "饼干糕点", "sort": 1264, "image": { "source_dir": "CS-012超市糕点饼干图310张", "match": "太平" } }
+      ],
+      "products": [
+        { "store_name": "盐焗腰果", "child_name": "坚果炒货", "store_info": "香脆饱满，休闲囤货常备。", "keyword": "腰果,坚果,零食", "unit_name": "袋", "price": "16.90", "cost": "11.60", "ot_price": "19.90", "stock": 75, "image": { "source_dir": "CS-007 坚果零食白底图285张", "match": "腰果" } },
+        { "store_name": "阿尔卑斯硬糖", "child_name": "糖果巧克", "store_info": "经典口味，收银台热销。", "keyword": "糖果,阿尔卑斯,零食", "unit_name": "袋", "price": "9.90", "cost": "6.20", "ot_price": "12.90", "stock": 98, "image": { "source_dir": "CS-009超市糖果图片220张", "match": "阿尔卑斯" } },
+        { "store_name": "乐事大波浪薯片", "child_name": "膨化零食", "store_info": "酥脆浓香，家庭分享装常备。", "keyword": "薯片,乐事,膨化", "unit_name": "袋", "price": "8.50", "cost": "5.10", "ot_price": "9.90", "stock": 120, "image": { "source_dir": "CS-010膨化食品图片219张", "match": "乐事大波浪薯片" } },
+        { "store_name": "太平苏打饼干", "child_name": "饼干糕点", "store_info": "咸香酥松，早餐加餐皆宜。", "keyword": "饼干,太平,糕点", "unit_name": "盒", "price": "7.80", "cost": "4.80", "ot_price": "8.90", "stock": 84, "image": { "source_dir": "CS-012超市糕点饼干图310张", "match": "太平" } }
+      ]
+    },
+    {
+      "name": "方便速食",
+      "sort": 1250,
+      "image": { "source_dir": "CS-011泡面速食图片235张", "match": "五谷道场" },
+      "children": [
+        { "name": "方便面食", "sort": 1251, "image": { "source_dir": "CS-011泡面速食图片235张", "match": "五谷道场" } },
+        { "name": "即食汤面", "sort": 1252, "image": { "source_dir": "CS-011泡面速食图片235张", "match": "拉面说" } }
+      ],
+      "products": [
+        { "store_name": "五谷道场方便面", "child_name": "方便面食", "store_info": "即泡即食，夜宵备货热卖。", "keyword": "方便面,速食,泡面", "unit_name": "桶", "price": "6.50", "cost": "4.00", "ot_price": "7.50", "stock": 130, "image": { "source_dir": "CS-011泡面速食图片235张", "match": "五谷道场" } },
+        { "store_name": "拉面说豚骨拉面", "child_name": "即食汤面", "store_info": "口味浓郁，适合便利店轻食售卖。", "keyword": "拉面说,拉面,速食", "unit_name": "盒", "price": "12.90", "cost": "8.60", "ot_price": "14.90", "stock": 66, "image": { "source_dir": "CS-011泡面速食图片235张", "match": "拉面说" } }
+      ]
+    },
+    {
+      "name": "粮油调味",
+      "sort": 1240,
+      "image": { "source_dir": "CS-008 超市食用油图片250张", "match": "花生油" },
+      "children": [
+        { "name": "食用油", "sort": 1241, "image": { "source_dir": "CS-008 超市食用油图片250张", "match": "花生油" } },
+        { "name": "杂粮干货", "sort": 1242, "image": { "source_dir": "CS-013超市五谷杂粮白底实拍图片袋装粗粮大豆玉米薯类329张", "match": "绿豆" } },
+        { "name": "调味酱料", "sort": 1243, "image": { "source_dir": "CS-021调味香料430张", "match": "生抽" } }
+      ],
+      "products": [
+        { "store_name": "鲁花花生油5L", "child_name": "食用油", "store_info": "家庭厨房常备，适合煎炒烹炸。", "keyword": "花生油,食用油,粮油", "unit_name": "桶", "price": "89.90", "cost": "76.00", "ot_price": "98.00", "stock": 24, "image": { "source_dir": "CS-008 超市食用油图片250张", "match": "花生油" } },
+        { "store_name": "金龙鱼玉米油", "child_name": "食用油", "store_info": "清淡少油烟，适合日常烹饪。", "keyword": "玉米油,食用油,粮油", "unit_name": "桶", "price": "69.90", "cost": "58.50", "ot_price": "78.00", "stock": 30, "image": { "source_dir": "CS-008 超市食用油图片250张", "match": "玉米油" } },
+        { "store_name": "真空绿豆", "child_name": "杂粮干货", "store_info": "炖粥煲汤常用，家庭备货稳定。", "keyword": "绿豆,杂粮,干货", "unit_name": "袋", "price": "8.90", "cost": "5.60", "ot_price": "9.90", "stock": 78, "image": { "source_dir": "CS-013超市五谷杂粮白底实拍图片袋装粗粮大豆玉米薯类329张", "match": "绿豆" } },
+        { "store_name": "海天金标生抽", "child_name": "调味酱料", "store_info": "厨房基础调味，高频动销。", "keyword": "生抽,海天,调味", "unit_name": "瓶", "price": "12.50", "cost": "8.10", "ot_price": "13.90", "stock": 92, "image": { "source_dir": "CS-021调味香料430张", "match": "海天金标生抽" } }
+      ]
+    },
+    {
+      "name": "早餐烘焙",
+      "sort": 1230,
+      "image": { "source_dir": "CS-015 面包图片素材160张", "relative_path": "1 (100).jpg" },
+      "children": [
+        { "name": "早餐面包", "sort": 1231, "image": { "source_dir": "CS-015 面包图片素材160张", "relative_path": "1 (100).jpg" } },
+        { "name": "西式点心", "sort": 1232, "image": { "source_dir": "CS-015 面包图片素材160张", "relative_path": "1 (54).jpg" } }
+      ],
+      "products": [
+        { "store_name": "蔓越莓软欧包", "child_name": "早餐面包", "store_info": "轻食早餐搭配，适合即买即食。", "keyword": "面包,早餐,烘焙", "unit_name": "个", "price": "9.90", "cost": "5.80", "ot_price": "11.90", "stock": 42, "image": { "source_dir": "CS-015 面包图片素材160张", "relative_path": "1 (100).jpg" } },
+        { "store_name": "奶香餐包", "child_name": "西式点心", "store_info": "口感松软，适合早餐与下午茶。", "keyword": "餐包,烘焙,点心", "unit_name": "袋", "price": "12.90", "cost": "7.80", "ot_price": "14.90", "stock": 38, "image": { "source_dir": "CS-015 面包图片素材160张", "relative_path": "1 (54).jpg" } }
+      ]
+    },
+    {
+      "name": "饮品酒水",
+      "sort": 1220,
+      "image": { "source_dir": "CS-016超市饮料白底图700张", "match": "农夫山泉" },
+      "children": [
+        { "name": "饮用水", "sort": 1221, "image": { "source_dir": "CS-016超市饮料白底图700张", "match": "农夫山泉" } },
+        { "name": "茶饮果汁", "sort": 1222, "image": { "source_dir": "CS-016超市饮料白底图700张", "match": "东方树叶" } },
+        { "name": "功能饮料", "sort": 1223, "image": { "source_dir": "CS-016超市饮料白底图700张", "match": "东鹏" } },
+        { "name": "啤酒", "sort": 1224, "image": { "source_dir": "CS-003超市啤酒图202张", "match": "乌苏" } },
+        { "name": "白酒", "sort": 1225, "image": { "source_dir": "CS-001 超市白酒图片304张", "match": "五粮液" } },
+        { "name": "红酒", "sort": 1226, "image": { "source_dir": "CS-002 超市红酒图片226张", "match": "威龙" } }
+      ],
+      "products": [
+        { "store_name": "农夫山泉饮用天然水", "child_name": "饮用水", "store_info": "补货频次高，适合便利店常规陈列。", "keyword": "农夫山泉,饮用水,酒水", "unit_name": "瓶", "price": "2.50", "cost": "1.20", "ot_price": "3.00", "stock": 300, "image": { "source_dir": "CS-016超市饮料白底图700张", "match": "农夫山泉" } },
+        { "store_name": "东方树叶乌龙茶", "child_name": "茶饮果汁", "store_info": "无糖茶饮，年轻用户常购。", "keyword": "东方树叶,无糖茶,饮料", "unit_name": "瓶", "price": "5.00", "cost": "3.10", "ot_price": "5.90", "stock": 160, "image": { "source_dir": "CS-016超市饮料白底图700张", "match": "东方树叶" } },
+        { "store_name": "东鹏特饮", "child_name": "功能饮料", "store_info": "即饮提神，外卖与便利店热销。", "keyword": "东鹏,功能饮料,提神", "unit_name": "瓶", "price": "6.50", "cost": "4.10", "ot_price": "7.50", "stock": 140, "image": { "source_dir": "CS-016超市饮料白底图700张", "match": "东鹏" } },
+        { "store_name": "乌苏啤酒", "child_name": "啤酒", "store_info": "聚会场景动销款。", "keyword": "乌苏,啤酒,酒水", "unit_name": "听", "price": "7.90", "cost": "5.50", "ot_price": "8.90", "stock": 96, "image": { "source_dir": "CS-003超市啤酒图202张", "match": "乌苏" } },
+        { "store_name": "五粮液浓香白酒", "child_name": "白酒", "store_info": "礼赠和节庆场景常备。", "keyword": "五粮液,白酒,酒水", "unit_name": "瓶", "price": "1299.00", "cost": "1180.00", "ot_price": "1399.00", "stock": 8, "image": { "source_dir": "CS-001 超市白酒图片304张", "match": "五粮液" } },
+        { "store_name": "威龙干红葡萄酒", "child_name": "红酒", "store_info": "餐酒场景常备，适合礼盒搭配。", "keyword": "威龙,红酒,葡萄酒", "unit_name": "瓶", "price": "59.00", "cost": "42.00", "ot_price": "69.00", "stock": 26, "image": { "source_dir": "CS-002 超市红酒图片226张", "match": "威龙" } }
+      ]
+    },
+    {
+      "name": "个护口腔",
+      "sort": 1210,
+      "image": { "source_dir": "CS-017 牙膏牙刷图365张", "match": "云南白药牙膏" },
+      "children": [
+        { "name": "牙膏", "sort": 1211, "image": { "source_dir": "CS-017 牙膏牙刷图365张", "match": "云南白药牙膏" } },
+        { "name": "牙刷牙线", "sort": 1212, "image": { "source_dir": "CS-017 牙膏牙刷图365张", "match": "牙刷" } }
+      ],
+      "products": [
+        { "store_name": "云南白药牙膏", "child_name": "牙膏", "store_info": "高频复购，日化区基础单品。", "keyword": "牙膏,云南白药,个护", "unit_name": "支", "price": "24.90", "cost": "17.50", "ot_price": "29.90", "stock": 64, "image": { "source_dir": "CS-017 牙膏牙刷图365张", "match": "云南白药牙膏" } },
+        { "store_name": "高露洁牙膏", "child_name": "牙膏", "store_info": "家庭常用款，动销稳定。", "keyword": "牙膏,高露洁,个护", "unit_name": "支", "price": "12.90", "cost": "8.50", "ot_price": "14.90", "stock": 88, "image": { "source_dir": "CS-017 牙膏牙刷图365张", "match": "高露洁牙膏" } },
+        { "store_name": "舒客软毛牙刷", "child_name": "牙刷牙线", "store_info": "柔软刷毛，适合便利店日化陈列。", "keyword": "牙刷,舒客,口腔", "unit_name": "支", "price": "9.90", "cost": "6.20", "ot_price": "11.90", "stock": 80, "image": { "source_dir": "CS-017 牙膏牙刷图365张", "match": "舒客牙刷" } }
+      ]
+    },
+    {
+      "name": "洗发护发",
+      "sort": 1200,
+      "image": { "source_dir": "CS-018 洗发水护发素310张", "match": "海飞丝洗发露" },
+      "children": [
+        { "name": "洗发露", "sort": 1201, "image": { "source_dir": "CS-018 洗发水护发素310张", "match": "海飞丝洗发露" } },
+        { "name": "护发素", "sort": 1202, "image": { "source_dir": "CS-018 洗发水护发素310张", "match": "潘婷护发素" } }
+      ],
+      "products": [
+        { "store_name": "海飞丝洗发露", "child_name": "洗发露", "store_info": "控油清爽，个护区常销。", "keyword": "海飞丝,洗发露,个护", "unit_name": "瓶", "price": "39.90", "cost": "30.80", "ot_price": "45.00", "stock": 34, "image": { "source_dir": "CS-018 洗发水护发素310张", "match": "海飞丝洗发露" } },
+        { "store_name": "潘婷护发素", "child_name": "护发素", "store_info": "顺滑修护，家庭洗护常备。", "keyword": "潘婷,护发素,洗护", "unit_name": "瓶", "price": "35.90", "cost": "27.00", "ot_price": "39.90", "stock": 28, "image": { "source_dir": "CS-018 洗发水护发素310张", "match": "潘婷护发素" } }
+      ]
+    },
+    {
+      "name": "沐浴清洁",
+      "sort": 1190,
+      "image": { "source_dir": "CS-019沐浴露香皂图片226张", "match": "六神沐浴露" },
+      "children": [
+        { "name": "沐浴露", "sort": 1191, "image": { "source_dir": "CS-019沐浴露香皂图片226张", "match": "六神沐浴露" } },
+        { "name": "香皂", "sort": 1192, "image": { "source_dir": "CS-019沐浴露香皂图片226张", "match": "舒肤佳香皂" } }
+      ],
+      "products": [
+        { "store_name": "六神清凉沐浴露", "child_name": "沐浴露", "store_info": "夏季动销强，适合日化专区。", "keyword": "六神,沐浴露,清洁", "unit_name": "瓶", "price": "22.90", "cost": "16.50", "ot_price": "26.90", "stock": 46, "image": { "source_dir": "CS-019沐浴露香皂图片226张", "match": "六神沐浴露" } },
+        { "store_name": "舒肤佳香皂", "child_name": "香皂", "store_info": "家庭日用常备，适合组合陈列。", "keyword": "舒肤佳,香皂,日化", "unit_name": "块", "price": "6.90", "cost": "4.20", "ot_price": "7.90", "stock": 120, "image": { "source_dir": "CS-019沐浴露香皂图片226张", "match": "舒肤佳香皂" } }
+      ]
+    },
+    {
+      "name": "纸品卫生",
+      "sort": 1180,
+      "image": { "source_dir": "CS-020超市卫生纸巾图片260张", "match": "清风" },
+      "children": [
+        { "name": "抽纸卷纸", "sort": 1181, "image": { "source_dir": "CS-020超市卫生纸巾图片260张", "match": "清风" } },
+        { "name": "湿巾护理", "sort": 1182, "image": { "source_dir": "CS-020超市卫生纸巾图片260张", "match": "维达" } }
+      ],
+      "products": [
+        { "store_name": "清风原木抽纸", "child_name": "抽纸卷纸", "store_info": "家清高频复购，适合多件组合。", "keyword": "清风,抽纸,纸品", "unit_name": "提", "price": "16.90", "cost": "12.30", "ot_price": "18.90", "stock": 68, "image": { "source_dir": "CS-020超市卫生纸巾图片260张", "match": "清风 原木纯品软抽纸面巾纸" } },
+        { "store_name": "维达便携湿巾", "child_name": "湿巾护理", "store_info": "便携装适合收银台陈列。", "keyword": "维达,湿巾,纸品", "unit_name": "包", "price": "5.90", "cost": "3.60", "ot_price": "6.90", "stock": 96, "image": { "source_dir": "CS-020超市卫生纸巾图片260张", "match": "维达 冰爽柔湿巾" } }
+      ]
+    }
+  ]
+}
