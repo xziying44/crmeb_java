@@ -229,3 +229,10 @@ export function combinationHeaderApi(){
   return request.get('combination/header',{},{noAuth:true});
 }
 
+/**
+ * 获取上线活动横幅列表
+ */
+export function getActivityBannerListApi() {
+  return request.get('activity/banner/list', {}, { noAuth: true });
+}
+

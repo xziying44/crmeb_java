@@ -52,6 +52,8 @@
 							<homeTab v-if="item.name == 'homeTab'&&!item.isHide" :dataConfig="item" @detail="goDetail"></homeTab>
 							<!-- 分类宫格 -->
 							<categoryGrid v-if="item.name == 'categoryGrid'&&!item.isHide" :dataConfig="item"></categoryGrid>
+							<!-- 活动横幅 -->
+							<activityBanner v-if="item.name == 'activityBanner'&&!item.isHide" :dataConfig="item"></activityBanner>
 						</view>
 					</view>
 
@@ -152,6 +154,7 @@
 	import group from "@/components/homeIndex/group.vue";
 	import bargain from "@/components/homeIndex/bargain.vue";
 	import categoryGrid from '@/components/homeIndex/categoryGrid.vue';
+	import activityBanner from '@/components/homeIndex/activityBanner.vue';
 	import pageFooter from "@/components/pageFooter/index.vue";
 	import copyRight from './components/copyRight.vue';
 	import {
@@ -211,6 +214,7 @@
 			group,
 			bargain,
 			categoryGrid,
+			activityBanner,
 			copyRight
 		},
 		data() {
