@@ -274,7 +274,8 @@ export default {
     // 选择图片
     modalPicTap() {
       this.$modalUpload(function(img) {
-        this.formData.image = img[0]
+        if (!img) return
+        this.formData.image = img[0].sattDir
       }.bind(this), 1)
     },
   },
