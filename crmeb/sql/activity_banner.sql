@@ -10,3 +10,16 @@ CREATE TABLE `eb_activity_banner` (
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='活动横幅表';
+
+-- 活动横幅菜单和权限
+INSERT INTO `eb_system_menu` (`pid`, `name`, `icon`, `perms`, `component`, `menu_type`, `sort`, `is_show`) VALUES
+(7, '活动横幅', '', '', '/marketing/banner/list', 'M', 5, 1);
+
+SET @banner_menu_id = LAST_INSERT_ID();
+
+INSERT INTO `eb_system_menu` (`pid`, `name`, `icon`, `perms`, `component`, `menu_type`, `sort`, `is_show`) VALUES
+(@banner_menu_id, '分页列表', '', 'admin:activity:banner:list', '', 'A', 0, 1),
+(@banner_menu_id, '新增', '', 'admin:activity:banner:save', '', 'A', 0, 1),
+(@banner_menu_id, '修改', '', 'admin:activity:banner:update', '', 'A', 0, 1),
+(@banner_menu_id, '删除', '', 'admin:activity:banner:delete', '', 'A', 0, 1),
+(@banner_menu_id, '更新状态', '', 'admin:activity:banner:status', '', 'A', 0, 1);
