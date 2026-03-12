@@ -336,6 +336,14 @@ export function getCategoryTwo(id)
   return request.get(`categorybypid/${id}`,{},{ noAuth : true});
 }
 /**
+ * 根据ID集合获取分类列表
+ * @param {string} ids 分类ID集合，逗号分隔
+*/
+export function getCategoryByIds(ids)
+{
+  return request.get(`category/listByIds`, { ids }, { noAuth : true });
+}
+/**
  * 获取备案设置
  *
 */

@@ -50,6 +50,8 @@
 							<goodList v-if="item.name == 'goodList'&&!item.isHide" :dataConfig="item" @detail="goDetail"></goodList>
 							<!-- 选项卡商品列表-->
 							<homeTab v-if="item.name == 'homeTab'&&!item.isHide" :dataConfig="item" @detail="goDetail"></homeTab>
+							<!-- 分类宫格 -->
+							<categoryGrid v-if="item.name == 'categoryGrid'&&!item.isHide" :dataConfig="item"></categoryGrid>
 						</view>
 					</view>
 
@@ -149,6 +151,7 @@
 	import hotSpot from '@/components/homeIndex/hotSpot.vue';
 	import group from "@/components/homeIndex/group.vue";
 	import bargain from "@/components/homeIndex/bargain.vue";
+	import categoryGrid from '@/components/homeIndex/categoryGrid.vue';
 	import pageFooter from "@/components/pageFooter/index.vue";
 	import copyRight from './components/copyRight.vue';
 	import {
@@ -207,6 +210,7 @@
 			hotSpot,
 			group,
 			bargain,
+			categoryGrid,
 			copyRight
 		},
 		data() {

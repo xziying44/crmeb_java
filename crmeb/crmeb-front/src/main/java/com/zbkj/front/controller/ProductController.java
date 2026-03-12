@@ -80,6 +80,14 @@ public class ProductController {
         return CommonResult.success(categoryService.getChildVoStatusOnListByPid(pid));
     }
 
+    @ApiOperation(value = "根据ID集合获取分类列表")
+    @RequestMapping(value = "/category/listByIds", method = RequestMethod.GET)
+    @ApiImplicitParam(name = "ids", value = "分类ID集合，逗号分隔", required = true)
+    public CommonResult<List<Category>> getCategoryByIds(@RequestParam String ids) {
+        List<Integer> idList = CrmebUtil.stringToArray(ids);
+        return CommonResult.success(categoryService.getByIds(idList));
+    }
+
     /**
      * 商品列表
      */
