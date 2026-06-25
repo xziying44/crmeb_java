@@ -76,7 +76,9 @@ public class WebConfig implements WebMvcConfigurer {
                 excludePathPatterns("/api/front/groom/list/**").
                 excludePathPatterns("/api/front/config").
                 excludePathPatterns("/api/front/category").
+                excludePathPatterns("/api/front/category/listByIds").
                 excludePathPatterns("/api/front/categorybypid/*").
+                excludePathPatterns("/api/front/activity/banner/list").
                 excludePathPatterns("/api/front/seckill/*").
                 excludePathPatterns("/api/front/seckill/list/*").
                 excludePathPatterns("/api/front/seckill/detail/*").
@@ -103,6 +105,8 @@ public class WebConfig implements WebMvcConfigurer {
                 excludePathPatterns("/api/front/combination/header").
                 excludePathPatterns("/api/front/combination/detail").
                 excludePathPatterns("/api/front/salesman/checkCode").  // 业务员邀请码验证（扫码场景）
+                excludePathPatterns("/api/front/promotion/buy-gift/products").
+                excludePathPatterns("/api/front/promotion/full-reduction/products").
                 excludePathPatterns("/swagger-resources/**", "/webjars/**", "/v2/**", "/swagger-ui.html/**");
     }
 

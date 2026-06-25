@@ -24,8 +24,8 @@ const activityRouteMap = {
   1: '/pages/activity/goods_seckill/index',
   2: '/pages/activity/goods_bargain/index',
   3: '/pages/activity/goods_combination/index',
-  4: '/pages/activity/promotionList/index?name=买赠活动&type=4',
-  5: '/pages/activity/promotionList/index?name=满减活动&type=4',
+  4: '/pages/activity/promotionList/index?name=买赠活动&apiType=buyGift',
+  5: '/pages/activity/promotionList/index?name=满减活动&apiType=fullReduction',
 };
 
 export default {

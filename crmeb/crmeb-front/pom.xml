@@ -22,6 +22,11 @@
             <artifactId>crmeb-service</artifactId>
             <version>${crmeb-service}</version>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

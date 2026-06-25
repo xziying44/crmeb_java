@@ -43,6 +43,7 @@
 	import emptyPage from '@/components/emptyPage.vue';
 	import GoodList from '@/components/goodList/index';
 	import {getGroomList} from '@/api/store';
+	import {getBuyGiftProductsApi, getFullReductionProductsApi} from '@/api/activity';
 	import {goPage} from '@/libs/order.js';
 	import {productRank} from '@/api/api.js'
 	import Loading from '@/components/Loading/index.vue';
@@ -68,15 +69,21 @@
 				loading: false,
 				goodScroll: true, //精品推荐开关
 				tempArr:[],
+				apiType: '', // buyGift / fullReduction
 			};
 		},
 		onLoad: function(e) {
 			this.typeInfo = e;
+			this.apiType = e.apiType || '';
 			uni.setNavigationBarTitle({
 				title: this.typeInfo.name
 			});
 			if(this.typeInfo.name == '商品排行'){
 				this.getProductRank();
+			}else if(this.apiType === 'buyGift'){
+				this.getBuyGiftProducts();
+			}else if(this.apiType === 'fullReduction'){
+				this.getFullReductionProducts();
 			}else{
 				this.getGroomList();
 			}
@@ -86,6 +93,26 @@
 				this.loading = true
 				if (!this.goodScroll) return
 				getGroomList(this.typeInfo.type, this.params).then(({data}) => {
+					this.goodScroll = data.list.length >= this.params.limit
+					this.loading = false
+					this.params.page++
+					this.tempArr = this.tempArr.concat(data.list)
+				})
+			},
+			getBuyGiftProducts() {
+				this.loading = true
+				if (!this.goodScroll) return
+				getBuyGiftProductsApi(this.params).then(({data}) => {
+					this.goodScroll = data.list.length >= this.params.limit
+					this.loading = false
+					this.params.page++
+					this.tempArr = this.tempArr.concat(data.list)
+				})
+			},
+			getFullReductionProducts() {
+				this.loading = true
+				if (!this.goodScroll) return
+				getFullReductionProductsApi(this.params).then(({data}) => {
 					this.goodScroll = data.list.length >= this.params.limit
 					this.loading = false
 					this.params.page++
@@ -107,7 +134,13 @@
 		},
 		onReachBottom() {
 			if (this.params.page != 1) {
-				this.getGroomList();
+				if(this.apiType === 'buyGift'){
+					this.getBuyGiftProducts();
+				}else if(this.apiType === 'fullReduction'){
+					this.getFullReductionProducts();
+				}else{
+					this.getGroomList();
+				}
 			}
 		},
 	}

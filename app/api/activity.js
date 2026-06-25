@@ -236,3 +236,17 @@ export function getActivityBannerListApi() {
   return request.get('activity/banner/list', {}, { noAuth: true });
 }
 
+/**
+ * 买赠活动商品列表
+ */
+export function getBuyGiftProductsApi(data) {
+  return request.get('promotion/buy-gift/products', data, { noAuth: true });
+}
+
+/**
+ * 满减活动商品列表
+ */
+export function getFullReductionProductsApi(data) {
+  return request.get('promotion/full-reduction/products', data, { noAuth: true });
+}
+
