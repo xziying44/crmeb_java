@@ -132,7 +132,7 @@
 
 			.pictrue {
 
-				::v-deepimage,
+				::v-deep image,
 				::v-deep.easy-loadimage,
 				uni-image {
 					width: 100%;

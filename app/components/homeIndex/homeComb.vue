@@ -679,7 +679,7 @@
 				transition: all 0.6s ease;
 			}
 
-			::v-deepswiper-item.active {
+			::v-deep swiper-item.active {
 				image {
 					transform: scale(1);
 				}

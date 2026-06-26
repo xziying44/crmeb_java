@@ -600,13 +600,13 @@
 		right: 0;
 	}
 
-	::v-deepcheckbox .uni-checkbox-input.uni-checkbox-input-checked {
+	::v-deep checkbox .uni-checkbox-input.uni-checkbox-input-checked {
 		@include main_bg_color(theme);
 		@include coupons_border_color(theme);
 		color: #fff !important
 	}
 
-	::v-deepcheckbox .wx-checkbox-input.wx-checkbox-input-checked {
+	::v-deep checkbox .wx-checkbox-input.wx-checkbox-input-checked {
 		@include main_bg_color(theme);
 		@include coupons_border_color(theme);
 		color: #fff !important;
