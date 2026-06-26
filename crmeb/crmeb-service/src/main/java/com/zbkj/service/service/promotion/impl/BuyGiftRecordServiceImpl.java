@@ -46,5 +46,15 @@ public class BuyGiftRecordServiceImpl extends ServiceImpl<BuyGiftRecordDao, BuyG
         record.setCreateTime(new Date());
         return save(record);
     }
+
+    @Override
+    public Boolean deleteByOrderId(String orderId) {
+        if (orderId == null || orderId.length() == 0) {
+            return false;
+        }
+        LambdaQueryWrapper<BuyGiftRecord> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(BuyGiftRecord::getOrderId, orderId);
+        return remove(wrapper);
+    }
 }
 

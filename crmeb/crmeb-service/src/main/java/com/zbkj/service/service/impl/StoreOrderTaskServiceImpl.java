@@ -134,6 +134,9 @@ public class StoreOrderTaskServiceImpl implements StoreOrderTaskService {
     @Autowired
     private SmsTemplateService smsTemplateService;
 
+    @Autowired
+    private com.zbkj.service.service.promotion.BuyGiftRecordService buyGiftRecordService;
+
     /**
      * 用户取消订单
      * @author Mr.Zhang
@@ -163,6 +166,8 @@ public class StoreOrderTaskServiceImpl implements StoreOrderTaskService {
                 }
                 // 退代金券
                 rollbackVoucher(storeOrder);
+                // 回滚买赠参与记录
+                rollbackBuyGiftRecord(storeOrder);
                 Boolean rollbackStock = rollbackStock(storeOrder);
                 if (!rollbackStock) {
                     throw new CrmebException("回滚库存失败");
@@ -187,6 +192,16 @@ public class StoreOrderTaskServiceImpl implements StoreOrderTaskService {
                 voucherUser.setUpdateTime(DateUtil.date());
                 couponUserService.updateById(voucherUser);
             }
+        }
+    }
+
+    /**
+     * 回滚买赠参与记录：订单取消/超时/退款时删除该订单的买赠参与记录，
+     * 避免已撤销的订单仍占用用户的买赠参与次数（导致用户被错误地拦截，无法再次参与）。
+     */
+    void rollbackBuyGiftRecord(StoreOrder storeOrder) {
+        if (StrUtil.isNotBlank(storeOrder.getOrderId())) {
+            buyGiftRecordService.deleteByOrderId(storeOrder.getOrderId());
         }
     }
 
@@ -268,12 +283,20 @@ public class StoreOrderTaskServiceImpl implements StoreOrderTaskService {
                     }
                 });
             }
-            else { // 正常商品回滚销量库存
+            else { // 正常商品回滚销量库存（含买赠赠品）
                 for (StoreOrderInfo orderInfoVo : orderInfoList) {
                     StoreProduct storeProduct = storeProductService.getById(orderInfoVo.getProductId());
-                    storeProductService.operationStock(storeProduct.getId(), orderInfoVo.getPayNum(), "add", storeProduct.getVersion());
-                    StoreProductAttrValue productAttrValue = attrValueService.getById(orderInfoVo.getAttrValueId());
-                    attrValueService.operationStock(productAttrValue.getId(), orderInfoVo.getPayNum(), "add", Constants.PRODUCT_TYPE_NORMAL, productAttrValue.getVersion());
+                    if (ObjectUtil.isNotNull(storeProduct)) {
+                        storeProductService.operationStock(storeProduct.getId(), orderInfoVo.getPayNum(), "add", storeProduct.getVersion());
+                    }
+                    // 赠品可能无规格(attrValueId=0)或规格已删除：与下单扣减逻辑对称，
+                    // 仅在规格存在时回滚规格库存，避免对 null 取值导致 NPE 使整单回滚失败
+                    if (orderInfoVo.getAttrValueId() != null && orderInfoVo.getAttrValueId() > 0) {
+                        StoreProductAttrValue productAttrValue = attrValueService.getById(orderInfoVo.getAttrValueId());
+                        if (ObjectUtil.isNotNull(productAttrValue)) {
+                            attrValueService.operationStock(productAttrValue.getId(), orderInfoVo.getPayNum(), "add", Constants.PRODUCT_TYPE_NORMAL, productAttrValue.getVersion());
+                        }
+                    }
                 }
             }
         } catch (Exception e) {
@@ -411,6 +434,8 @@ public class StoreOrderTaskServiceImpl implements StoreOrderTaskService {
             }
             // 退代金券
             rollbackVoucher(storeOrder);
+            // 回滚买赠参与记录
+            rollbackBuyGiftRecord(storeOrder);
             return Boolean.TRUE;
         });
         return execute;
@@ -466,6 +491,8 @@ public class StoreOrderTaskServiceImpl implements StoreOrderTaskService {
             }
             // 退代金券
             rollbackVoucher(storeOrder);
+            // 回滚买赠参与记录
+            rollbackBuyGiftRecord(storeOrder);
             // 回滚库存
             Boolean rollbackStock = rollbackStock(storeOrder);
             if (!rollbackStock) {
