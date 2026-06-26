@@ -161,6 +161,8 @@ public class StoreOrderTaskServiceImpl implements StoreOrderTaskService {
                     couponUser.setUpdateTime(DateUtil.date());
                     couponUserService.updateById(couponUser);
                 }
+                // 退代金券
+                rollbackVoucher(storeOrder);
                 Boolean rollbackStock = rollbackStock(storeOrder);
                 if (!rollbackStock) {
                     throw new CrmebException("回滚库存失败");
@@ -170,6 +172,21 @@ public class StoreOrderTaskServiceImpl implements StoreOrderTaskService {
             return execute;
         }catch (Exception e){
             return false;
+        }
+    }
+
+    /**
+     * 回滚（退还）订单使用的代金券：将代金券领取记录状态恢复为可用。
+     * 取消/超时/退款时调用，避免用户已用代金券却因订单未成交而永久丢券。
+     */
+    void rollbackVoucher(StoreOrder storeOrder) {
+        if (storeOrder.getVoucherId() != null && storeOrder.getVoucherId() > 0) {
+            StoreCouponUser voucherUser = couponUserService.getById(storeOrder.getVoucherId());
+            if (voucherUser != null) {
+                voucherUser.setStatus(CouponConstants.STORE_COUPON_USER_STATUS_USABLE);
+                voucherUser.setUpdateTime(DateUtil.date());
+                couponUserService.updateById(voucherUser);
+            }
         }
     }
 
@@ -392,6 +409,8 @@ public class StoreOrderTaskServiceImpl implements StoreOrderTaskService {
                 couponUser.setUpdateTime(DateUtil.date());
                 couponUserService.updateById(couponUser);
             }
+            // 退代金券
+            rollbackVoucher(storeOrder);
             return Boolean.TRUE;
         });
         return execute;
@@ -445,6 +464,8 @@ public class StoreOrderTaskServiceImpl implements StoreOrderTaskService {
                 couponUser.setUpdateTime(DateUtil.date());
                 couponUserService.updateById(couponUser);
             }
+            // 退代金券
+            rollbackVoucher(storeOrder);
             // 回滚库存
             Boolean rollbackStock = rollbackStock(storeOrder);
             if (!rollbackStock) {
