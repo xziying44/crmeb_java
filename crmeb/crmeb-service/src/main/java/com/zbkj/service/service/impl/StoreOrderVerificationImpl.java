@@ -184,17 +184,36 @@ public class StoreOrderVerificationImpl implements StoreOrderVerification {
             StorePink storePink = storePinkService.getById(storeOrder.getPinkId());
             if (storePink.getStatus() != 2) throw new CrmebException("当前订单正在拼团中不能核销！");
         }
-        storeOrder.setStatus(Constants.ORDER_STATUS_INT_BARGAIN);
-        storeOrder.setClerkId(currentAdmin.getId());
-        storeOrder.setUpdateTime(DateUtil.date());
-        boolean saveStatus = dao.updateById(storeOrder) > 0;
+        boolean saveStatus = claimVerification(storeOrder.getId(), currentAdmin.getId());
+        if (!saveStatus) {
+            // 并发/重复核销：订单已不在"待核销"状态，拒绝以避免重复发放后续奖励
+            throw new CrmebException("订单已被核销或状态已变更，请勿重复核销");
+        }
 
         // 小程序订阅消息发送
-        if(saveStatus){
-            //后续操作放入redis
-            redisUtil.lPush(TaskConstants.ORDER_TASK_REDIS_KEY_AFTER_TAKE_BY_USER, storeOrder.getId());
-        }
+        //后续操作放入redis
+        redisUtil.lPush(TaskConstants.ORDER_TASK_REDIS_KEY_AFTER_TAKE_BY_USER, storeOrder.getId());
         return saveStatus;
+    }
+
+    /**
+     * 原子抢占核销：仅当订单仍处于"待核销"（status=0、已支付、未退款）时写入核销状态。
+     * 通过带条件的 UPDATE 把"校验状态 + 写状态"合并为单条原子语句，
+     * 防止同一核销码并发/重复核销导致状态被多次写入、后续奖励重复发放。
+     *
+     * @return 是否抢占成功（affectedRows &gt; 0）
+     */
+    boolean claimVerification(Integer orderId, Integer clerkId) {
+        StoreOrder update = new StoreOrder();
+        update.setStatus(Constants.ORDER_STATUS_INT_BARGAIN);
+        update.setClerkId(clerkId);
+        update.setUpdateTime(DateUtil.date());
+        // 带状态守卫的条件更新：仅当订单仍是待核销(status=0、已支付、未退款)时才写入，保证"校验+写状态"原子
+        return dao.update(update, Wrappers.<StoreOrder>lambdaUpdate()
+                .eq(StoreOrder::getId, orderId)
+                .eq(StoreOrder::getStatus, 0)
+                .eq(StoreOrder::getPaid, true)
+                .eq(StoreOrder::getRefundStatus, 0)) > 0;
     }
 
     /**
