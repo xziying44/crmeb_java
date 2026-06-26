@@ -5,6 +5,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
 import com.zbkj.common.constants.StockConstants;
@@ -191,28 +192,47 @@ public class StockCheckServiceImpl extends ServiceImpl<StockCheckDao, StockCheck
         if (CollUtil.isEmpty(items)) {
             throw new CrmebException("盘点明细不存在");
         }
+        for (StockCheckItem item : items) {
+            if (item.getActualStock() == null) {
+                throw new CrmebException("请先录入所有盘点明细的实际库存");
+            }
+        }
+
+        // 原子抢占状态（CHECKING -> COMPLETED），防止并发或重复确认导致库存被多次调整
+        int claimed = stockCheckDao.update(null, Wrappers.<StockCheck>lambdaUpdate()
+                .eq(StockCheck::getId, id)
+                .eq(StockCheck::getStatus, StockConstants.CHECK_STATUS_CHECKING)
+                .set(StockCheck::getStatus, StockConstants.CHECK_STATUS_COMPLETED));
+        if (claimed != 1) {
+            throw new CrmebException("盘点单状态已变更，请勿重复确认");
+        }
 
         int totalProfit = 0;
         int totalLoss = 0;
 
         for (StockCheckItem item : items) {
-            if (item.getActualStock() == null) {
-                throw new CrmebException("请先录入所有盘点明细的实际库存");
-            }
             int systemStock = Optional.ofNullable(item.getSystemStock()).orElse(0);
             int actualStock = item.getActualStock();
-            int diff = actualStock - systemStock;
+            int diff = actualStock - systemStock;   // 相对盘点开始时账面的盘盈/盘亏（报表口径）
             item.setDiffQuantity(diff);
             stockCheckItemDao.updateById(item);
 
             if (diff > 0) {
                 totalProfit += diff;
-                stockService.stockIn(item.getProductId(), item.getAttrValueId(), diff,
-                        StockConstants.LOG_TYPE_CHECK_PROFIT_IN, StockConstants.RELATION_TYPE_CHECK,
-                        check.getId().longValue(), StrUtil.format("盘点单{}盘盈调整", check.getCheckNo()));
             } else if (diff < 0) {
                 totalLoss += Math.abs(diff);
-                stockService.stockOut(item.getProductId(), item.getAttrValueId(), Math.abs(diff),
+            }
+
+            // 库存校正以实盘数为准：按"实盘 - 当前实际库存"调整，避免盘点期间库存变动导致校正错误；
+            // 盘亏量天然不超过当前库存，规避盘亏超量导致确认事务回滚而永久卡死
+            int currentStock = stockService.getCurrentStock(item.getProductId(), item.getAttrValueId());
+            int adjust = actualStock - currentStock;
+            if (adjust > 0) {
+                stockService.stockIn(item.getProductId(), item.getAttrValueId(), adjust,
+                        StockConstants.LOG_TYPE_CHECK_PROFIT_IN, StockConstants.RELATION_TYPE_CHECK,
+                        check.getId().longValue(), StrUtil.format("盘点单{}盘盈调整", check.getCheckNo()));
+            } else if (adjust < 0) {
+                stockService.stockOut(item.getProductId(), item.getAttrValueId(), Math.abs(adjust),
                         StockConstants.LOG_TYPE_CHECK_LOSS_OUT, StockConstants.RELATION_TYPE_CHECK,
                         check.getId().longValue(), StrUtil.format("盘点单{}盘亏调整", check.getCheckNo()));
             }

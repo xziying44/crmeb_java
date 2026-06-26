@@ -63,4 +63,9 @@ public interface StockService extends IService<Stock> {
      * 初始化库存数据：从商品/规格库存同步到 eb_stock（一次性脚本）
      */
     Boolean initStockFromProduct();
+
+    /**
+     * 获取指定商品/规格的当前实际库存（不存在返回 0）
+     */
+    Integer getCurrentStock(Integer productId, Integer attrValueId);
 }

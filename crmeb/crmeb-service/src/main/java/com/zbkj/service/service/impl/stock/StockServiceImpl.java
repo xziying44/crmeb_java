@@ -228,6 +228,12 @@ public class StockServiceImpl extends ServiceImpl<StockDao, Stock> implements St
         stockDao.updateById(update);
     }
 
+    @Override
+    public Integer getCurrentStock(Integer productId, Integer attrValueId) {
+        Stock record = getStockRecord(productId, Optional.ofNullable(attrValueId).orElse(0));
+        return record == null ? 0 : Optional.ofNullable(record.getStock()).orElse(0);
+    }
+
     private Stock getStockRecord(Integer productId, Integer attrValueId) {
         LambdaQueryWrapper<Stock> lqw = new LambdaQueryWrapper<>();
         lqw.eq(Stock::getProductId, productId);
