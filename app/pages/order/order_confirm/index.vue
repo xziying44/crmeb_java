@@ -417,7 +417,7 @@
 						.productType ===
 						'normal' ? true : false;
 					// 加载完成后计算价格（获取满减等促销信息）
-					this.computedPrice();
+					this.computedPrice().catch(() => {});
 				}).catch(err => {
 					uni.navigateTo({
 						url: '/pages/users/order_list/index'
@@ -456,10 +456,10 @@
 					})
 				}
 			},
-			// 计算订单价格
+			// 计算订单价格（返回 Promise，失败时向上抛出便于调用方回滚）
 			computedPrice: function() {
 				let shippingType = this.shippingType;
-				postOrderComputed({
+				return postOrderComputed({
 					addressId: this.addressId,
 					useIntegral: this.useIntegral ? true : false,
 					couponId: this.couponId,
@@ -486,16 +486,18 @@
 					this.voucherFee = data.voucherPrice || 0;
 					//this.orderInfoVo.userIntegral = data.userIntegral;
 				}).catch(err => {
-					return this.$util.Tips({
+					this.$util.Tips({
 						title: err
 					});
+					// 继续向上抛出，便于调用方（如代金券选择）回滚状态
+					return Promise.reject(err);
 				});
 			},
 			//选择地址还是门店自提
 			addressType: function(e) {
 				let index = e;
 				this.shippingType = parseInt(index);
-				this.computedPrice();
+				this.computedPrice().catch(() => {});
 				//调起获取定位信息
 				if (index == 1) {
 					this.getList();
@@ -505,7 +507,7 @@
 			bindPickerChange: function(e) {
 				let value = e.detail.value;
 				this.shippingType = value;
-				this.computedPrice();
+				this.computedPrice().catch(() => {});
 			},
 			ChangCouponsClone: function() {
 				this.$set(this.coupon, 'coupon', false);
@@ -545,12 +547,13 @@
 				this.couponId = couponId;
 				this.$set(this.coupon, 'list', list);
 
-				// 调用价格计算验证优惠券是否可用
+				// 调用价格计算验证优惠券是否可用（必须携带 voucherId，否则 payFee 会丢失代金券抵扣）
 				let shippingType = this.shippingType;
 				postOrderComputed({
 					addressId: this.addressId,
 					useIntegral: this.useIntegral ? true : false,
 					couponId: this.couponId,
+					voucherId: this.voucherId,
 					shippingType: parseInt(shippingType) + 1,
 					preOrderNo: this.preOrderNo
 				}).then(res => {
@@ -568,6 +571,8 @@
 					this.fullReductionId = data.fullReductionId || 0;
 					this.fullReductionName = data.fullReductionName || '';
 					this.fullReductionPrice = data.fullReductionPrice || 0;
+					// 同步代金券抵扣，保持明细与应付总额一致
+					this.voucherFee = data.voucherPrice || 0;
 					// 关闭优惠券弹窗
 					this.$set(this.coupon, 'coupon', false);
 				}).catch(err => {
@@ -588,7 +593,7 @@
 			 */
 			ChangeIntegral: function() {
 				this.useIntegral = !this.useIntegral;
-				this.computedPrice();
+				this.computedPrice().catch(() => {});
 			},
 			bindHideKeyboard: function(e) {
 				this.mark = e.detail.value;
@@ -650,10 +655,18 @@
 			},
 			// 代金券选择变更
 			onVoucherChange: function(e) {
+				// 保存之前的状态，校验失败时回滚，避免出现“显示已抵扣但金额未更新”的脏状态
+				let previousVoucherId = this.voucherId;
+				let previousSelectedVoucher = this.selectedVoucher;
+				let previousVoucherFee = this.voucherFee;
 				this.voucherId = e.voucherId || 0;
 				this.selectedVoucher = e.voucher || null;
 				// 重新计算订单价格，后端会计算代金券抵扣
-				this.computedPrice();
+				this.computedPrice().catch(() => {
+					this.voucherId = previousVoucherId;
+					this.selectedVoucher = previousSelectedVoucher;
+					this.voucherFee = previousVoucherFee;
+				});
 			},
 			car: function() {
 				let that = this;
@@ -736,6 +749,7 @@
 					phone: that.contactsTel,
 					addressId: that.addressId,
 					couponId: that.couponId,
+					voucherId: that.voucherId,
 					useIntegral: that.useIntegral,
 					preOrderNo: that.preOrderNo,
 					mark: that.mark,
