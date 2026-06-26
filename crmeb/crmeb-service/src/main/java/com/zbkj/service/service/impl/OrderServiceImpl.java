@@ -156,6 +156,9 @@ public class OrderServiceImpl implements OrderService {
     private StoreCouponUserService storeCouponUserService;
 
     @Autowired
+    private com.zbkj.service.service.StoreCouponService storeCouponService;
+
+    @Autowired
     private com.zbkj.service.service.promotion.PromotionCalculateService promotionCalculateService;
 
     @Autowired
@@ -2165,6 +2168,21 @@ public class OrderServiceImpl implements OrderService {
         orderInfoVo.setFreightFee(freightFee);
     }
 
+    /**
+     * 计算代金券抵扣后的"商品应付"与"剩余运费"。
+     * 代金券先抵扣商品应付，超出部分（仅在允许抵扣运费时 voucherFee 可能大于商品应付）抵扣运费，
+     * 避免运费被重复计入应付金额。
+     *
+     * @return [商品应付, 剩余运费]
+     */
+    static BigDecimal[] splitVoucherDeduction(BigDecimal payableAfterCoupon, BigDecimal voucherFee, BigDecimal freightFee) {
+        // 代金券先抵商品应付，超出部分抵运费；运费扣减后不再被重复计入应付
+        BigDecimal voucherOnProduct = voucherFee.min(payableAfterCoupon);
+        BigDecimal productPayable = payableAfterCoupon.subtract(voucherOnProduct).max(BigDecimal.ZERO);
+        BigDecimal remainingFreight = freightFee.subtract(voucherFee.subtract(voucherOnProduct)).max(BigDecimal.ZERO);
+        return new BigDecimal[]{productPayable, remainingFreight};
+    }
+
     private ComputedOrderPriceResponse computedPrice(OrderComputedPriceRequest request, OrderInfoVo orderInfoVo, User user) {
         ComputedOrderPriceResponse priceResponse = new ComputedOrderPriceResponse();
 
@@ -2249,6 +2267,16 @@ public class OrderServiceImpl implements OrderService {
                 StoreCouponUser storeCouponUser = storeCouponUserService.getById(couponUserId);
                 if (ObjectUtil.isNull(storeCouponUser) || !storeCouponUser.getUid().equals(user.getUid())) {
                     throw new CrmebException("优惠券领取记录不存在！");
+                }
+                // 防止代金券被当作优惠券与代金券通道重复抵扣：同一张券不能同时作为优惠券和代金券
+                if (ObjectUtil.isNotNull(request.getVoucherId()) && request.getVoucherId() > 0
+                        && request.getVoucherId().equals(couponUserId)) {
+                    throw new CrmebException("代金券不能作为优惠券使用");
+                }
+                com.zbkj.common.model.coupon.StoreCoupon couponDefinition = storeCouponService.getById(storeCouponUser.getCouponId());
+                if (ObjectUtil.isNotNull(couponDefinition) && couponDefinition.getCouponType() != null
+                        && couponDefinition.getCouponType() == 2) {
+                    throw new CrmebException("代金券不能作为优惠券使用");
                 }
                 if (storeCouponUser.getStatus() == 1) {
                     throw new CrmebException("此优惠券已使用！");
@@ -2394,16 +2422,16 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // 7) 积分抵扣（在满减/优惠券/代金券之后）
-        BigDecimal productPayable = payableAfterCoupon.subtract(voucherFee);
-        if (productPayable.compareTo(BigDecimal.ZERO) < 0) {
-            productPayable = BigDecimal.ZERO;
-        }
+        // 代金券可能抵扣运费：拆分为"商品应付"和"剩余运费"，避免运费被重复计入应付
+        BigDecimal[] voucherSplit = splitVoucherDeduction(payableAfterCoupon, voucherFee, freightFee);
+        BigDecimal productPayable = voucherSplit[0];
+        BigDecimal remainingFreight = voucherSplit[1];
         priceResponse.setUseIntegral(request.getUseIntegral());
         if (!request.getUseIntegral() || user.getIntegral() <= 0) {
             priceResponse.setDeductionPrice(BigDecimal.ZERO);
             priceResponse.setSurplusIntegral(user.getIntegral());
             priceResponse.setUsedIntegral(0);
-            priceResponse.setPayFee(productPayable.add(freightFee));
+            priceResponse.setPayFee(productPayable.add(remainingFreight));
             return priceResponse;
         }
 
@@ -2427,7 +2455,7 @@ public class OrderServiceImpl implements OrderService {
             payPrice = BigDecimal.ZERO;
         }
         priceResponse.setDeductionPrice(deductionPrice);
-        priceResponse.setPayFee(payPrice.add(freightFee));
+        priceResponse.setPayFee(payPrice.add(remainingFreight));
         return priceResponse;
     }
 }
