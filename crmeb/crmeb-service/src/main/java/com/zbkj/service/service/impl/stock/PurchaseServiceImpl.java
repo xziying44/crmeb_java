@@ -247,13 +247,16 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, Purchase> impl
                 throw new CrmebException("入库数量不能大于剩余待入库数量");
             }
 
+            // 原子增加已入库数量（带"不超过计划数量"守卫），防止并发入库超收/丢失更新；失败则回滚事务
+            int updated = purchaseItemDao.increaseInQuantity(item.getId(), inQty);
+            if (updated != 1) {
+                throw new CrmebException("入库数量超过剩余待入库数量，请刷新后重试");
+            }
+
             // 库存增加（采购入库）
             stockService.stockIn(item.getProductId(), item.getAttrValueId(), inQty,
                     StockConstants.LOG_TYPE_PURCHASE_IN, StockConstants.RELATION_TYPE_PURCHASE,
                     purchase.getId().longValue(), StrUtil.format("采购入库：{}，明细ID={}", purchase.getPurchaseNo(), item.getId()));
-
-            item.setInQuantity(Optional.ofNullable(item.getInQuantity()).orElse(0) + inQty);
-            purchaseItemDao.updateById(item);
         }
 
         // 更新采购单状态：部分入库 / 已入库
