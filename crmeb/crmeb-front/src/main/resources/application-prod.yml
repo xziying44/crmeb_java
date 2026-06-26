@@ -16,13 +16,13 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/crmeb?characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
-    username: crmeb
-    password: rytkip7WZY58Y5MC
+    url: jdbc:mysql://${DB_HOST:127.0.0.1}:${DB_PORT:3306}/${DB_NAME:crmeb}?characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: ${DB_USERNAME:crmeb}
+    password: ${DB_PASSWORD} # 从环境变量注入，禁止提交明文口令
   redis:
-    host: 127.0.0.1 #地址
-    port: 6379 #端口
-    password: #无密码
+    host: ${REDIS_HOST:127.0.0.1} #地址
+    port: ${REDIS_PORT:6379} #端口
+    password: ${REDIS_PASSWORD:} #从环境变量注入，默认空
     timeout: 10000 # 连接超时时间（毫秒）
     database: 0 #默认数据库
     jedis:
