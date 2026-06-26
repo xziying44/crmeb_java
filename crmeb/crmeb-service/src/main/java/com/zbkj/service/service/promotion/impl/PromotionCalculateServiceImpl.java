@@ -91,6 +91,11 @@ public class PromotionCalculateServiceImpl implements PromotionCalculateService 
         if (coupon.getCouponType() == null || coupon.getCouponType() != 2) {
             throw new CrmebException("所选券不是代金券");
         }
+        // 校验最低使用门槛（与优惠券一致），防止低于门槛使用代金券
+        BigDecimal minPrice = couponUser.getMinPrice();
+        if (minPrice != null && minPrice.compareTo(BigDecimal.ZERO) > 0 && productPayable.compareTo(minPrice) < 0) {
+            throw new CrmebException("订单金额未达到代金券使用门槛");
+        }
 
         BigDecimal maxDeduct = productPayable;
         if (Boolean.TRUE.equals(coupon.getCanDeductFreight())) {
