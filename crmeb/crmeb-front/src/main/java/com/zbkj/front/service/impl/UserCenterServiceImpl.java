@@ -1178,8 +1178,10 @@ public class UserCenterServiceImpl extends ServiceImpl<UserDao, User> implements
         // 赠送客户优惠券
         if (CollUtil.isNotEmpty(couponUserList)) {
             couponUserList.forEach(couponUser -> couponUser.setUid(uid));
-            storeCouponUserService.saveBatch(couponUserList);
-            couponList.forEach(coupon -> storeCouponService.deduction(coupon.getId(), 1, coupon.getIsLimited()));
+            // M3: 先原子扣减再发券，限量券售罄则跳过(不阻断注册)，防止并发超发
+            java.util.Map<Integer, Boolean> limitedMap = new java.util.HashMap<>();
+            couponList.forEach(coupon -> limitedMap.put(coupon.getId(), coupon.getIsLimited()));
+            storeCouponUserService.grantCouponsSkipExhausted(couponUserList, limitedMap);
         }
     }
 

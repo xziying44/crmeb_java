@@ -44,6 +44,18 @@ public interface StoreCouponUserService extends IService<StoreCouponUser> {
      */
     Boolean receive(StoreCouponUserRequest storeCouponUserRequest);
 
+    /**
+     * 自动赠送场景批量发券（注册赠券/满额赠券等）：逐券先原子扣减库存
+     * （限量券 deduction(true)，非限量 deduction(false) 仅累计），
+     * 限量券扣减失败则跳过该券、不阻断主流程（注册/支付回调等绝不能因赠券售罄而回滚），
+     * 仅持久化扣减成功的券。
+     *
+     * @param couponUsers       待发放的券（已设置好 uid/couponId 等）
+     * @param limitedByCouponId couponId -&gt; 是否限量
+     * @return 实际发放（持久化）的券数量
+     */
+    int grantCouponsSkipExhausted(List<StoreCouponUser> couponUsers, java.util.Map<Integer, Boolean> limitedByCouponId);
+
     HashMap<Integer, StoreCouponUser> getMapByUserId(Integer userId);
 
     /**

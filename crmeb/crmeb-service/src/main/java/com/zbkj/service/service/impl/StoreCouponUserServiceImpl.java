@@ -185,16 +185,44 @@ public class StoreCouponUserServiceImpl extends ServiceImpl<StoreCouponUserDao, 
             storeCouponUserList.add(storeCouponUser);
         }
 
-        storeCoupon.setLastTotal(storeCoupon.getLastTotal() - uidList.size());
-
         Boolean execute = transactionTemplate.execute(e -> {
+            // M3: 先按发放人数原子扣减库存、扣减成功才批量发券，防止限量券并发超发
+            // （旧逻辑用 lastTotal - size 内存相减 + updateById 盲写，并发下会超发）
+            if (storeCoupon.getIsLimited()) {
+                if (!storeCouponService.deduction(storeCoupon.getId(), uidList.size(), true)) {
+                    throw new CrmebException("当前剩余数量不够领取！");
+                }
+            } else {
+                storeCouponService.deduction(storeCoupon.getId(), uidList.size(), false);
+            }
             saveBatch(storeCouponUserList);
-            storeCoupon.setUpdateTime(DateUtil.date());
-            storeCouponService.updateById(storeCoupon);
             return Boolean.TRUE;
         });
 
         return execute;
+    }
+
+    @Override
+    public int grantCouponsSkipExhausted(List<StoreCouponUser> couponUsers, java.util.Map<Integer, Boolean> limitedByCouponId) {
+        if (CollUtil.isEmpty(couponUsers)) {
+            return 0;
+        }
+        // 逐券先原子扣减库存：限量券扣减失败则跳过该券（不阻断注册/支付等主流程），
+        // 非限量正常累计；仅持久化扣减成功的券，避免限量券并发超发
+        List<StoreCouponUser> grantedList = new ArrayList<>();
+        for (StoreCouponUser couponUser : couponUsers) {
+            Boolean isLimited = limitedByCouponId == null ? Boolean.FALSE : limitedByCouponId.get(couponUser.getCouponId());
+            boolean granted = Boolean.TRUE.equals(isLimited)
+                    ? storeCouponService.deduction(couponUser.getCouponId(), 1, true)
+                    : storeCouponService.deduction(couponUser.getCouponId(), 1, false);
+            if (granted) {
+                grantedList.add(couponUser);
+            }
+        }
+        if (CollUtil.isNotEmpty(grantedList)) {
+            saveBatch(grantedList);
+        }
+        return grantedList.size();
     }
 
     /**
@@ -393,8 +421,15 @@ public class StoreCouponUserServiceImpl extends ServiceImpl<StoreCouponUserDao, 
             storeCouponUser.setPrimaryKey(storeCoupon.getPrimaryKey());
         }
         Boolean execute = transactionTemplate.execute(e -> {
+            // M3: 先原子扣减库存、扣减成功才发券，防止限量券并发超发（旧逻辑先发后扣且忽略返回值）
+            if (storeCoupon.getIsLimited()) {
+                if (!storeCouponService.deduction(storeCoupon.getId(), 1, true)) {
+                    throw new CrmebException("当前剩余数量不够领取！");
+                }
+            } else {
+                storeCouponService.deduction(storeCoupon.getId(), 1, false);
+            }
             save(storeCouponUser);
-            storeCouponService.deduction(storeCoupon.getId(), 1, storeCoupon.getIsLimited());
             return Boolean.TRUE;
         });
 

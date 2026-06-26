@@ -1063,10 +1063,8 @@ public class OrderPayServiceImpl implements OrderPayService {
         }
 
         Boolean execute = transactionTemplate.execute(e -> {
-            if (CollUtil.isNotEmpty(couponUserList)) {
-                storeCouponUserService.saveBatch(couponUserList);
-                couponUserList.forEach(i -> storeCouponService.deduction(i.getCouponId(), 1, couponMap.get(i.getCouponId())));
-            }
+            // M3: 先原子扣减再发券，限量券售罄则跳过该券(绝不能因赠券售罄回滚支付回调)，防止并发超发
+            storeCouponUserService.grantCouponsSkipExhausted(couponUserList, couponMap);
             return Boolean.TRUE;
         });
         if (!execute) {
