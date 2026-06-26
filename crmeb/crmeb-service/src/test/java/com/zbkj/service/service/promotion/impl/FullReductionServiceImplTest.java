@@ -10,7 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -19,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
@@ -26,6 +30,7 @@ import static org.mockito.Mockito.*;
  * FullReductionServiceImpl 单元测试
  */
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class FullReductionServiceImplTest {
 
     @Mock
@@ -34,6 +39,7 @@ class FullReductionServiceImplTest {
     @Mock
     private FullReductionProductService productService;
 
+    @Spy
     @InjectMocks
     private FullReductionServiceImpl fullReductionService;
 
@@ -73,6 +79,26 @@ class FullReductionServiceImplTest {
         assertEquals(new BigDecimal("99"), levels.get(0).getFullAmount());
         assertEquals(new BigDecimal("199"), levels.get(1).getFullAmount());
         assertEquals(new BigDecimal("299"), levels.get(2).getFullAmount());
+    }
+
+    @Test
+    void getDisplayInfoByProduct_阶梯fullAmount为null时不抛NPE并过滤脏数据() {
+        FullReduction reduction = new FullReduction();
+        reduction.setId(1);
+        reduction.setName("满减");
+        // 跳过依赖数据库的 getAvailableByProductIds，直接返回一个活动
+        doReturn(reduction).when(fullReductionService).getAvailableByProductIds(anyList(), any());
+        // 阶梯中混入一条 fullAmount 为 null 的脏数据
+        List<FullReductionLevel> levels = Arrays.asList(
+                createLevel(1, new BigDecimal("99"), new BigDecimal("10")),
+                createLevel(1, null, new BigDecimal("5"))
+        );
+        when(levelService.getByReductionId(1)).thenReturn(levels);
+
+        FullReductionDisplayVO vo = fullReductionService.getDisplayInfoByProduct(7, Collections.singletonList(2));
+
+        assertNotNull(vo, "阶梯含 null fullAmount 脏数据时不应抛 NPE");
+        assertEquals(1, vo.getLevels().size(), "应过滤掉 fullAmount 为 null 的脏阶梯");
     }
 
     private FullReductionLevel createLevel(Integer reductionId, BigDecimal fullAmount, BigDecimal reduceAmount) {

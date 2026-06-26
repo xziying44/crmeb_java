@@ -370,8 +370,8 @@ public class SalesmanServiceImpl implements SalesmanService {
             throw new CrmebException("客户不存在");
         }
 
-        // 验证该客户是否属于当前业务员
-        if (!user.getSalesmanId().equals(salesmanId)) {
+        // 验证该客户是否属于当前业务员（客户未绑定业务员时 salesmanId 为 null，应拒绝而非空指针）
+        if (user.getSalesmanId() == null || !user.getSalesmanId().equals(salesmanId)) {
             throw new CrmebException("无权查看该客户");
         }
 

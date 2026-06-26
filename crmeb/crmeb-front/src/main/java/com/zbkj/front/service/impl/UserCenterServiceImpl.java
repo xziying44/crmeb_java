@@ -516,7 +516,6 @@ public class UserCenterServiceImpl extends ServiceImpl<UserDao, User> implements
     @Override
     public LoginResponse weChatAuthorizeProgramLogin(String code, RegisterThirdUserRequest request) {
         WeChatMiniAuthorizeVo response = wechatNewService.miniAuthCode(code);
-        System.out.println("小程序登陆成功 = " + JSON.toJSONString(response));
 
         //检测是否存在
         UserToken userToken = userTokenService.getByOpenidAndType(response.getOpenId(), Constants.THIRD_LOGIN_TOKEN_TYPE_PROGRAM);
@@ -1119,7 +1118,6 @@ public class UserCenterServiceImpl extends ServiceImpl<UserDao, User> implements
                 }
 
                 WeChatMiniAuthorizeVo response = wechatNewService.miniAuthCode(request.getCode());
-                System.out.println("小程序登陆成功 = " + JSON.toJSONString(response));
                 String decrypt = WxUtil.decrypt(programAppId, request.getEncryptedData(), response.getSessionKey(), request.getIv());
                 if (StrUtil.isBlank(decrypt)) {
                     throw new CrmebException("微信小程序获取手机号解密失败");

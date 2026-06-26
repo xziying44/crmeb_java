@@ -271,8 +271,14 @@ public class FullReductionServiceImpl extends ServiceImpl<FullReductionDao, Full
             return null;
         }
 
-        // 3. 按满足金额升序排列（方便前端展示：从低到高）
-        levels.sort(Comparator.comparing(FullReductionLevel::getFullAmount));
+        // 3. 过滤阈值为空的脏数据，并按满足金额升序排列（方便前端展示：从低到高）
+        levels = levels.stream()
+                .filter(l -> l.getFullAmount() != null)
+                .sorted(Comparator.comparing(FullReductionLevel::getFullAmount))
+                .collect(Collectors.toList());
+        if (CollUtil.isEmpty(levels)) {
+            return null;
+        }
 
         // 4. 组装返回对象
         FullReductionDisplayVO vo = new FullReductionDisplayVO();

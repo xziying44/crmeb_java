@@ -1,7 +1,10 @@
 package com.zbkj.service.service.impl;
 
+import com.zbkj.common.exception.CrmebException;
 import com.zbkj.common.model.salesman.SalesmanInfo;
+import com.zbkj.common.model.user.User;
 import com.zbkj.service.service.SalesmanInfoService;
+import com.zbkj.service.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,6 +22,9 @@ class SalesmanServiceImplTest {
 
     @Mock
     private SalesmanInfoService salesmanInfoService;
+
+    @Mock
+    private UserService userService;
 
     @InjectMocks
     private SalesmanServiceImpl salesmanService;
@@ -49,6 +55,19 @@ class SalesmanServiceImplTest {
         infoNull.setBindable(null);
         when(salesmanInfoService.getByCode("DEF456")).thenReturn(infoNull);
         assertFalse(salesmanService.checkCode("DEF456"));
+    }
+
+    @Test
+    void getCustomerDetail_客户未绑定业务员时应拒绝而非NPE() {
+        User customer = new User();
+        customer.setUid(100);
+        customer.setSalesmanId(null); // 该客户未绑定任何业务员
+        when(userService.getById(100)).thenReturn(customer);
+
+        CrmebException ex = assertThrows(CrmebException.class,
+                () -> salesmanService.getCustomerDetail(5, 100));
+        assertTrue(ex.getMessage() != null && ex.getMessage().contains("无权"),
+                "未绑定业务员的客户应提示无权查看，而非空指针，实际=" + ex.getMessage());
     }
 }
 
