@@ -162,6 +162,12 @@ public class OrderServiceImpl implements OrderService {
     private com.zbkj.service.service.promotion.PromotionCalculateService promotionCalculateService;
 
     @Autowired
+    private com.zbkj.service.service.promotion.FullReductionService fullReductionService;
+
+    @Autowired
+    private com.zbkj.service.service.promotion.FullReductionProductService fullReductionProductService;
+
+    @Autowired
     private com.zbkj.service.service.promotion.BuyGiftRecordService buyGiftRecordService;
 
     @Autowired
@@ -2183,6 +2189,49 @@ public class OrderServiceImpl implements OrderService {
         return new BigDecimal[]{productPayable, remainingFreight};
     }
 
+    /**
+     * 计算"参与某满减活动的商品"在订单中的子总额（用于指定商品/品类满减按子总额计算阈值与减免）。
+     * 商品参与判定：该满减活动 id 命中商品级关系，或命中商品所属品类的关系。
+     */
+    private BigDecimal scopedReductionSubtotal(Integer reductionId, List<OrderInfoDetailVo> orderDetailList) {
+        BigDecimal subtotal = BigDecimal.ZERO;
+        if (reductionId == null || CollUtil.isEmpty(orderDetailList)) {
+            return subtotal;
+        }
+        for (OrderInfoDetailVo d : orderDetailList) {
+            if (itemParticipatesInReduction(reductionId, d.getProductId())) {
+                subtotal = subtotal.add(d.getVipPrice().multiply(new BigDecimal(d.getPayNum().toString())));
+            }
+        }
+        return subtotal;
+    }
+
+    /**
+     * 判定某商品是否参与指定满减活动：商品级关系命中，或商品所属任一品类关系命中。
+     */
+    private boolean itemParticipatesInReduction(Integer reductionId, Integer productId) {
+        if (productId == null) {
+            return false;
+        }
+        // 商品级命中
+        List<Integer> productReductionIds = fullReductionProductService.getReductionIdsByProductId(productId);
+        if (CollUtil.isNotEmpty(productReductionIds) && productReductionIds.contains(reductionId)) {
+            return true;
+        }
+        // 品类级命中（按商品所属品类）
+        List<Integer> categoryIds = storeProductService.getProductAllCategoryIdByProductIds(
+                java.util.Collections.singletonList(productId));
+        if (CollUtil.isNotEmpty(categoryIds)) {
+            for (Integer cid : categoryIds) {
+                List<Integer> catReductionIds = fullReductionProductService.getReductionIdsByCategoryId(cid);
+                if (CollUtil.isNotEmpty(catReductionIds) && catReductionIds.contains(reductionId)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private ComputedOrderPriceResponse computedPrice(OrderComputedPriceRequest request, OrderInfoVo orderInfoVo, User user) {
         ComputedOrderPriceResponse priceResponse = new ComputedOrderPriceResponse();
 
@@ -2237,6 +2286,11 @@ public class OrderServiceImpl implements OrderService {
             com.zbkj.common.vo.MyRecord fullReductionResult = promotionCalculateService.calculateFullReduction(productIdList, categoryIdList, proTotalFee);
             fullReduction = fullReductionResult.get("reduction");
             BigDecimal fr = fullReductionResult.getBigDecimal("reduceAmount");
+            // M6: 指定商品/品类满减按"参与活动的商品子总额"计算阈值与减免，避免用整单金额凑单触发超额折扣
+            if (fullReduction != null && fullReduction.getScopeType() != null && fullReduction.getScopeType() != 1) {
+                BigDecimal scopedSubtotal = scopedReductionSubtotal(fullReduction.getId(), orderDetailList);
+                fr = fullReductionService.calculateReduction(fullReduction, scopedSubtotal);
+            }
             fullReductionPrice = fr == null ? BigDecimal.ZERO : fr;
             priceResponse.setFullReductionId(fullReduction != null ? fullReduction.getId() : 0);
             priceResponse.setFullReductionName(fullReduction != null ? fullReduction.getName() : "");
